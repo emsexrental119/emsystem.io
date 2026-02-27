@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>시공사례 | EM시스템</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0b0e14;
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
+      --gold:#c8a97e;
+      --shadow:0 18px 60px rgba(0,0,0,.55);
+      --r:18px;
+      --max:1160px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"IBM Plex Sans KR",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 520px at 20% 10%, rgba(200,169,126,.18), transparent 55%),
+        radial-gradient(900px 520px at 80% 15%, rgba(90,160,255,.14), transparent 58%),
+        linear-gradient(180deg,#070a10 0%,var(--bg) 70%);
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+
+    /* ✅ 공통 상단바 */
+    .topbar{
+      position:sticky;top:0;z-index:1000;
+      backdrop-filter: blur(10px);
+      background: rgba(9,11,17,.65);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .topbar .wrap{
+      height:84px;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+    }
+    .brand{display:flex;align-items:center;text-decoration:none}
+    .brand img{height:52px;width:auto;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+    .nav{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,.68);flex-wrap:wrap}
+    .nav a{text-decoration:none;padding:10px 12px;border-radius:999px;transition:.2s ease}
+    .nav a:hover{color:rgba(255,255,255,.92);background:rgba(255,255,255,.06)}
+    .nav a.active{color:rgba(255,255,255,.92);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+    .nav .cta{color:#111;background:var(--gold);font-weight:900}
+
+    .page{padding:34px 0 40px}
+    h1{font-family:"Playfair Display",serif;font-weight:600;margin:0 0 10px;font-size:38px}
+    .sub{margin:0;color:rgba(255,255,255,.68);line-height:1.7}
+
+    /* ✅ 12장 그리드 */
+    .galleryGrid{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+    .gItem{
+      border-radius:16px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      cursor:pointer;
+      transition:.35s ease;
+      position:relative;
+      min-height:240px;
+    }
+    .gItem img{
+      width:100%;height:100%;
+      object-fit:cover;display:block;
+      transform:scale(1.03);
+      transition:transform .45s ease;
+      filter:brightness(1.04) contrast(1.05) saturate(1.06);
+    }
+    .gItem::after{
+      content:"";position:absolute;inset:0;
+      background:rgba(0,0,0,0);
+      transition:.35s ease;
+      pointer-events:none;
+    }
+    .gItem:hover img{transform:scale(1.10)}
+    .gItem:hover::after{background:rgba(0,0,0,.18)}
+    .gItem:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,0,0,.45)}
+
+    /* Lightbox */
+    #lightbox{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.92);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+    }
+    #lightbox.open{display:flex}
+    #lightbox-img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 0 40px rgba(0,0,0,.8)}
+    .lb-stage{max-width:92vw;max-height:88vh;display:flex;align-items:center;justify-content:center}
+    .lb-close{
+      position:absolute;top:16px;right:16px;
+      width:44px;height:44px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.35);
+      color:rgba(255,255,255,.92);
+      font-size:26px;cursor:pointer;
+      backdrop-filter:blur(10px);
+    }
+    .lb-nav{
+      position:absolute;top:50%;transform:translateY(-50%);
+      width:52px;height:52px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.35);
+      color:rgba(255,255,255,.92);
+      font-size:30px;cursor:pointer;
+      backdrop-filter:blur(10px);
+      transition:.2s ease;
+    }
+    .lb-nav:hover{background:rgba(0,0,0,.55);transform:translateY(-50%) scale(1.03)}
+    .lb-prev{left:18px}
+    .lb-next{right:18px}
+
+    /* ✅ 카카오 고정 버튼 */
+    .kakao-fixed{
+      position:fixed;right:18px;bottom:18px;z-index:1200;
+      display:inline-flex;align-items:center;gap:10px;
+      padding:14px 16px;border-radius:999px;
+      background:rgba(254,229,0,.95);color:#111;font-weight:900;text-decoration:none;
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:0 18px 55px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      transition:.2s ease;
+    }
+    .kakao-fixed:hover{transform:translateY(-2px);filter:brightness(.98)}
+    .kakao-dot{width:10px;height:10px;border-radius:999px;background:#111;opacity:.85;box-shadow:0 0 0 5px rgba(17,17,17,.08)}
+
+    @media(max-width:980px){
+      .galleryGrid{grid-template-columns:1fr}
+      .topbar .wrap{height:auto;padding:10px 0}
+      .brand img{height:46px}
+      .lb-nav{width:44px;height:44px;font-size:26px}
+    }
+    @media(max-width:520px){
+      .kakao-fixed span:last-child{display:none;}
+      .kakao-fixed{width:56px;height:56px;justify-content:center;padding:0;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="EM시스템 홈">
+        <img src="images/ems-logo.png" alt="EM시스템 로고">
+      </a>
+      <nav class="nav" aria-label="메뉴">
+        <a href="index.html">홈</a>
+        <a href="services.html">서비스</a>
+        <a href="works.html" class="active">시공사례</a>
+        <a href="about.html">강점</a>
+        <a href="contact.html">문의</a>
+        <a href="contact.html" class="cta">견적요청</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="wrap">
+      <h1>시공사례</h1>
+      <p class="sub">이미지를 클릭하면 확대해서 볼 수 있습니다. (좌우 버튼 / 키보드 ← → / 모바일 스와이프 지원)</p>
+
+      <div class="galleryGrid" id="galleryGrid">
+        <div class="gItem"><img src="images/1.jpg" alt="" data-index="0"></div>
+        <div class="gItem"><img src="images/2.jpg" alt="" data-index="1"></div>
+        <div class="gItem"><img src="images/3.jpg" alt="" data-index="2"></div>
+        <div class="gItem"><img src="images/4.jpg" alt="" data-index="3"></div>
+        <div class="gItem"><img src="images/5.jpg" alt="" data-index="4"></div>
+        <div class="gItem"><img src="images/6.jpg" alt="" data-index="5"></div>
+        <div class="gItem"><img src="images/7.jpg" alt="" data-index="6"></div>
+        <div class="gItem"><img src="images/8.jpg" alt="" data-index="7"></div>
+        <div class="gItem"><img src="images/9.jpg" alt="" data-index="8"></div>
+        <div class="gItem"><img src="images/10.jpg" alt="" data-index="9"></div>
+        <div class="gItem"><img src="images/11.jpg" alt="" data-index="10"></div>
+        <div class="gItem"><img src="images/12.jpg" alt="" data-index="11"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" aria-hidden="true">
+    <button class="lb-close" type="button" aria-label="닫기" id="lbClose">×</button>
+    <button class="lb-nav lb-prev" type="button" aria-label="이전 이미지" id="lbPrev">‹</button>
+
+    <div class="lb-stage" id="lbStage">
+      <img id="lightbox-img" alt="">
+    </div>
+
+    <button class="lb-nav lb-next" type="button" aria-label="다음 이미지" id="lbNext">›</button>
+  </div>
+
+  <a class="kakao-fixed" href="http://pf.kakao.com/_SxlTzX" target="_blank" rel="noopener">
+    <span class="kakao-dot"></span>
+    <span>카카오 상담</span>
+  </a>
+
+  <script>
+    const workImages = Array.from({length:12}, (_,i)=>`images/${i+1}.jpg`);
+    let lbIndex = 0;
+
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const lbClose = document.getElementById('lbClose');
+    const lbPrev = document.getElementById('lbPrev');
+    const lbNext = document.getElementById('lbNext');
+    const lbStage = document.getElementById('lbStage');
+
+    function openLightbox(idx){
+      lbIndex = idx;
+      lbImg.src = workImages[lbIndex];
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
+    }
+    function closeLightbox(){
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+    }
+    function prevLightbox(){
+      lbIndex = (lbIndex - 1 + workImages.length) % workImages.length;
+      lbImg.src = workImages[lbIndex];
+    }
+    function nextLightbox(){
+      lbIndex = (lbIndex + 1) % workImages.length;
+      lbImg.src = workImages[lbIndex];
+    }
+
+    document.querySelectorAll('#galleryGrid img').forEach(img=>{
+      img.addEventListener('click', ()=>{
+        const idx = Number(img.dataset.index || 0);
+        openLightbox(idx);
+      });
+    });
+
+    lbClose.addEventListener('click', closeLightbox);
+    lbStage.addEventListener('click', closeLightbox);
+    lbPrev.addEventListener('click', prevLightbox);
+    lbNext.addEventListener('click', nextLightbox);
+
+    document.addEventListener('keydown', (e)=>{
+      if(!lightbox.classList.contains('open')) return;
+      if(e.key === 'Escape') closeLightbox();
+      if(e.key === 'ArrowLeft') prevLightbox();
+      if(e.key === 'ArrowRight') nextLightbox();
+    });
+
+    let sX=0,eX=0;
+    lightbox.addEventListener('touchstart', (e)=>{ sX = e.touches[0].clientX; });
+    lightbox.addEventListener('touchmove', (e)=>{ eX = e.touches[0].clientX; });
+    lightbox.addEventListener('touchend', ()=>{
+      if(!lightbox.classList.contains('open')) return;
+      if(sX - eX > 50) nextLightbox();
+      if(eX - sX > 50) prevLightbox();
+    });
+  </script>
+</body>
+</html>
