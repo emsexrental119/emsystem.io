@@ -729,7 +729,6 @@
           <a class="btn primary" href="works.html">시공사례 전체 보기</a>
         </div>
 
-        <!-- ✅ 주요 전시장 -->
         <div class="venueWrap">
           <div class="venueTitle">주요 시공 전시장</div>
           <div class="venueHeadline">국내 주요 전시장 시공 경험</div>
@@ -787,7 +786,6 @@
       <span>카카오 상담</span>
     </a>
 
-    <!-- ✅ 라이트박스(공용) -->
     <div class="lightbox" id="lightbox" aria-hidden="true">
       <div class="lbStage" id="lbStage">
         <div class="lbCounter" id="lbCounter">1 / 1</div>
@@ -798,9 +796,8 @@
         <div class="lbHint" id="lbHint">마우스휠: 확대/축소 · 드래그: 이동 · 좌/우 키: 이동 · ESC: 닫기</div>
       </div>
     </div>
-  </div><!-- /#main -->
+  </div>
 
-  <!-- ✅ YouTube Iframe API -->
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
@@ -828,7 +825,6 @@
       }
     })();
 
-    // ✅ HERO hover 대체(터치)
     const heroCard = document.getElementById("heroCard");
     let touchMode = false;
     heroCard.addEventListener("touchstart", () => {
@@ -838,9 +834,9 @@
       }
     }, { passive:true });
 
-    // ✅ YouTube Player + 컨트롤(재생/정지 + 진행바)
+    // ✅ YouTube Player + 컨트롤
     let player;
-    const videoId = "qFCeqlV-xsM";
+    const videoId = "hAIHCYVcKCA";  // ✅ 여기 변경 완료
 
     const control = document.getElementById("videoControl");
     const track = document.getElementById("timelineTrack");
@@ -916,11 +912,9 @@
 
       let w, h;
       if(stageAR > AR){
-        // 무대가 더 넓음 -> 높이에 맞추고 좌우 여백
         h = H;
         w = H * AR;
       }else{
-        // 무대가 더 좁음 -> 너비에 맞추고 상하 여백
         w = W;
         h = W / AR;
       }
@@ -931,7 +925,6 @@
 
     window.addEventListener("resize", fitYouTube);
 
-    // ✅ YouTube API
     window.onYouTubeIframeAPIReady = function(){
       player = new YT.Player("ytSizer", {
         videoId,
@@ -971,9 +964,7 @@
       if(!dragging) return;
       seekByClientX(e.clientX);
     });
-    window.addEventListener("mouseup", () => {
-      dragging = false;
-    });
+    window.addEventListener("mouseup", () => { dragging = false; });
 
     track.addEventListener("touchstart", (e) => {
       dragging = true;
@@ -984,11 +975,9 @@
       if(!e.touches || !e.touches[0]) return;
       seekByClientX(e.touches[0].clientX);
     }, { passive:true });
-    window.addEventListener("touchend", () => {
-      dragging = false;
-    });
+    window.addEventListener("touchend", () => { dragging = false; });
 
-    // ✅ 공용 라이트박스: index 안의 모든 img.zoomable 확대
+    // ✅ 공용 라이트박스
     const lightbox = document.getElementById("lightbox");
     const lbImg = document.getElementById("lbImg");
     const lbCounter = document.getElementById("lbCounter");
@@ -1004,7 +993,6 @@
     }));
 
     let currentIndex = 0;
-
     let scale = 1, tx = 0, ty = 0;
     let isPanning = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
 
