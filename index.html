@@ -16,6 +16,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 
+  <!-- ✅ GoatCounter 방문자 집계 -->
+  <script data-goatcounter="https://emsystem.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
   <style>
     :root{
       --bg:#0b0e14;
@@ -466,6 +470,21 @@
       font-size:12px;
     }
 
+    /* ✅ 방문자 카운터(푸터 하단) */
+    .visitorCounter{
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(255,255,255,.14);
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,.58);
+      letter-spacing: .02em;
+    }
+    .visitorCounter strong{
+      color: rgba(255,255,255,.86);
+      font-weight: 900;
+    }
+
     /* 카카오 고정 */
     .kakao-fixed{
       position: fixed; right:18px; bottom:18px; z-index:1200;
@@ -783,6 +802,12 @@
             <div>© <span id="year"></span> EMSystem. All rights reserved.</div>
             <div style="color:rgba(255,255,255,.45)">EMSystem · Exhibition Rental & Installation</div>
           </div>
+
+          <!-- ✅ 방문자 표시(하루/총) -->
+          <div class="visitorCounter" aria-label="방문자 통계">
+            오늘 방문자 <strong id="gcToday">-</strong> · 총 방문자 <strong id="gcTotal">-</strong>
+          </div>
+
         </div>
       </div>
     </footer>
@@ -809,6 +834,26 @@
   <script>
     // ✅ 연도
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // ✅ GoatCounter: 오늘/총 방문자 표시
+    (function(){
+      const BASE = "https://emsystem.goatcounter.com";
+      const todayEl = document.getElementById("gcToday");
+      const totalEl = document.getElementById("gcTotal");
+      if(!todayEl || !totalEl) return;
+
+      // 총 방문자 (누적 카운트)
+      fetch(`${BASE}/counter/emsystem.co.kr.json`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => { totalEl.textContent = (d && (d.count ?? d.total ?? d.hits)) ?? "-"; })
+        .catch(() => { totalEl.textContent = "집계중"; });
+
+      // 오늘 방문자
+      fetch(`${BASE}/api/v0/stats/total`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => { todayEl.textContent = (d && (d.today ?? d.todays ?? d.today_count)) ?? "-"; })
+        .catch(() => { todayEl.textContent = "집계중"; });
+    })();
 
     // ✅ 인트로 1회만 (강제: ?intro=1)
     (function(){
@@ -1097,6 +1142,4 @@
     lbImg.addEventListener("dblclick", (e) => { e.preventDefault(); resetTransform(); });
   </script>
 </body>
-
 </html>
-
