@@ -36,6 +36,30 @@
     a{color:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
 
+    /* ✅ 인트로(홈에서 1회만) */
+    #intro{
+      position:fixed; inset:0; z-index:9999;
+      display:flex; align-items:center; justify-content:center;
+      background:#000;
+    }
+    .introInner{ text-align:center; padding:24px; }
+    .introLogo{
+      height:66px; width:auto;
+      opacity:.96;
+      filter: drop-shadow(0 10px 28px rgba(0,0,0,.55));
+      margin-bottom:18px;
+    }
+    .introTitle{
+      font-family:"Playfair Display",serif;
+      font-size:54px;
+      letter-spacing:.06em;
+      margin:0;
+      opacity:0;
+      transform:translateY(14px);
+      animation:introUp .9s ease forwards;
+    }
+    @keyframes introUp{ to{opacity:1; transform:translateY(0)} }
+
     /* ✅ 공통 상단바 */
     .topbar{
       position:sticky; top:0; z-index:1000;
@@ -79,7 +103,7 @@
     .hero{padding:54px 0 40px}
     .heroGrid{
       display:grid;
-      grid-template-columns:1.1fr .9fr;
+      grid-template-columns:1.08fr .92fr;
       gap:24px;
       align-items:stretch;
     }
@@ -114,7 +138,7 @@
     .btn.primary{background:var(--gold);color:#111;border-color:transparent}
     .btn.ghost{background:transparent}
 
-    /* ✅ HERO CARD (영상 + 가운데 버튼 + 타임라인) */
+    /* ✅ HERO CARD (유튜브 + 컨트롤 + 진행바) */
     .heroCard{
       border-radius:var(--r);
       border:1px solid rgba(255,255,255,.10);
@@ -124,34 +148,50 @@
       min-height:380px;
       background:rgba(255,255,255,.03);
     }
-    .heroCard video{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      transform:scale(1.03);
-      filter:brightness(1.05) contrast(1.05) saturate(1.05);
-    }
-    .heroCard::after{
+    .ytBox{ position:absolute; inset:0; background:#000; }
+    .ytBox::after{
       content:"";position:absolute;inset:0;
       background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.58));
       pointer-events:none;
+      z-index:4;
     }
+
+    /* ✅ JS가 16:9로 "contain" 맞추는 무대 */
+    #ytStage{
+      position:absolute; inset:0;
+      z-index:1;
+    }
+    #ytSizer{
+      position:absolute;
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      width:100%;
+      height:100%;
+      border-radius:14px;
+      overflow:hidden;
+    }
+    #ytSizer iframe{
+      width:100% !important;
+      height:100% !important;
+      border:0;
+      display:block;
+    }
+
     .heroCardBadge{
-      position:absolute;left:16px;bottom:16px;z-index:2;
+      position:absolute;left:16px;bottom:52px;z-index:6;
       display:flex;flex-direction:column;gap:6px;
       pointer-events:none;
     }
     .badgeTitle{font-weight:900}
     .badgeSub{font-size:13px;color:rgba(255,255,255,.75)}
 
-    /* ✅ 재생/정지 버튼: 가운데 + hover/touch에서만 표시 */
+    /* 재생/정지 버튼 */
     .videoControl{
       position:absolute;
       left:50%;
       top:50%;
       transform:translate(-50%,-50%);
-      z-index:3;
+      z-index:7;
       width:66px;height:66px;border-radius:999px;
       display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,.45);
@@ -172,12 +212,12 @@
     .videoControl:hover{background:rgba(0,0,0,.65);transform:translate(-50%,-50%) scale(1.02)}
     .videoControl:active{transform:translate(-50%,-50%) scale(0.98)}
 
-    /* ✅ 타임라인: 영상 하단 + hover/touch에서만 표시 */
+    /* 진행바 */
     .videoTimeline{
       position:absolute;
       left:14px; right:14px;
       bottom:12px;
-      z-index:4;
+      z-index:7;
       display:flex;
       align-items:center;
       gap:10px;
@@ -236,7 +276,7 @@
     }
     .sectionTitle p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;max-width:56ch}
 
-    /* Services cards */
+    /* 제품목록 카드 */
     .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .card{
       border-radius:var(--r);
@@ -255,21 +295,15 @@
       filter:brightness(1.04) contrast(1.05) saturate(1.06);
       display:block;
     }
-    /* ✅ 사인물: 안 잘리게 contain + 여백 */
     .media img.fit-contain{
       object-fit:contain;
       background:rgba(0,0,0,.18);
       padding:10px;
       filter:none;
     }
-    /* ✅ 서비스 이미지 클릭 힌트(이미지 밑) */
     .imgHint{
-      position:absolute;
-      left:10px;
-      bottom:10px;
-      z-index:2;
-      font-size:12px;
-      font-weight:900;
+      position:absolute;left:10px;bottom:10px;z-index:2;
+      font-size:12px;font-weight:900;
       color:rgba(255,255,255,.86);
       background:rgba(0,0,0,.38);
       border:1px solid rgba(255,255,255,.14);
@@ -278,23 +312,21 @@
       backdrop-filter: blur(10px);
       pointer-events:none;
     }
-    /* ✅ 클릭 가능 커서 */
     .media img.zoomable{cursor:zoom-in;}
     .body{padding:16px}
     .body h3{margin:0 0 8px;font-size:18px}
     .body p{margin:0;color:var(--muted);line-height:1.7;font-size:14px}
 
-    /* Works preview */
+    /* 시공사례(인덱스에서 클릭=확대) */
     .galleryGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .gItem{
       border-radius:16px;overflow:hidden;
       border:1px solid rgba(255,255,255,.08);
       background:rgba(255,255,255,.04);
-      cursor:pointer;
+      cursor:zoom-in;
       transition:.35s ease;
       position:relative;
       min-height:220px;
-      display:block;
     }
     .gItem img{
       width:100%;height:100%;object-fit:cover;display:block;
@@ -312,7 +344,7 @@
     .gItem:hover::after{background:rgba(0,0,0,.18)}
     .gItem:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,0,0,.45)}
 
-    /* ✅ 주요 전시장 로고 섹션 */
+    /* 주요 전시장 */
     .venueWrap{
       margin-top: 26px;
       padding: 26px 18px;
@@ -358,7 +390,7 @@
       transform: translateY(-1px);
     }
 
-    /* ✅ 고급 푸터 */
+    /* 푸터 */
     footer{
       padding: 42px 0 64px;
       background: rgba(6,8,12,.55);
@@ -372,30 +404,15 @@
       padding: 22px;
       box-shadow: 0 18px 55px rgba(0,0,0,.35);
     }
-    .footerTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:18px;
-      flex-wrap:wrap;
-      margin-bottom: 14px;
-    }
     .footerBrand{
       display:flex;
       align-items:center;
       gap:12px;
+      margin-bottom: 10px;
     }
     .footerBrand img{height:40px;width:auto;opacity:.95}
-    .footerBrandTitle{
-      font-weight:900;
-      color:rgba(255,255,255,.92);
-      line-height:1.2;
-    }
-    .footerBrandSub{
-      font-size:12px;
-      color:rgba(255,255,255,.60);
-      margin-top:4px;
-    }
+    .footerBrandTitle{font-weight:900;color:rgba(255,255,255,.92);line-height:1.2}
+    .footerBrandSub{font-size:12px;color:rgba(255,255,255,.60);margin-top:4px}
     .footerGrid{
       display:grid;
       grid-template-columns: 1.1fr .9fr;
@@ -443,7 +460,7 @@
       font-size:12px;
     }
 
-    /* ✅ 카카오 고정 버튼 */
+    /* 카카오 고정 */
     .kakao-fixed{
       position: fixed; right:18px; bottom:18px; z-index:1200;
       display:inline-flex; align-items:center; gap:10px;
@@ -457,14 +474,10 @@
     .kakao-fixed:hover{transform:translateY(-2px);filter:brightness(.98);box-shadow:0 22px 70px rgba(0,0,0,.55)}
     .kakao-dot{width:10px;height:10px;border-radius:999px;background:#111;opacity:.85;box-shadow:0 0 0 5px rgba(17,17,17,.08)}
 
-    /* ✅ 라이트박스(서비스 이미지 확대 + 좌우 버튼 + 줌/드래그) */
+    /* ✅ 라이트박스(공용) */
     .lightbox{
-      position:fixed;
-      inset:0;
-      z-index:5000;
-      display:none;
-      align-items:center;
-      justify-content:center;
+      position:fixed; inset:0; z-index:5000;
+      display:none; align-items:center; justify-content:center;
       background:rgba(0,0,0,.78);
       backdrop-filter: blur(6px);
       padding:24px;
@@ -482,8 +495,7 @@
     .lbImg{
       max-width:100%;
       max-height:100%;
-      width:auto;
-      height:auto;
+      width:auto;height:auto;
       object-fit:contain;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.14);
@@ -497,8 +509,7 @@
     .lbImg:active{cursor:grabbing;}
     .lbHint{
       position:absolute;
-      bottom:10px;
-      left:50%;
+      bottom:10px; left:50%;
       transform:translateX(-50%);
       font-size:12px;
       color:rgba(255,255,255,.72);
@@ -511,11 +522,8 @@
       line-height:1.3;
     }
     .lbClose{
-      position:absolute;
-      top:14px;
-      right:14px;
-      width:44px;height:44px;
-      border-radius:999px;
+      position:absolute; top:14px; right:14px;
+      width:44px;height:44px;border-radius:999px;
       display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,.45);
       border:1px solid rgba(255,255,255,.18);
@@ -524,17 +532,14 @@
       font-weight:900;
     }
     .lbNav{
-      position:absolute;
-      top:50%;
+      position:absolute; top:50%;
       transform:translateY(-50%);
-      width:52px;height:52px;
-      border-radius:999px;
+      width:52px;height:52px;border-radius:999px;
       display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,.45);
       border:1px solid rgba(255,255,255,.18);
       color:rgba(255,255,255,.92);
-      cursor:pointer;
-      font-weight:900;
+      cursor:pointer;font-weight:900;
       backdrop-filter: blur(10px);
       transition:.15s ease;
     }
@@ -542,11 +547,8 @@
     .lbPrev{left:10px;}
     .lbNext{right:10px;}
     .lbCounter{
-      position:absolute;
-      top:16px;
-      left:16px;
-      font-size:12px;
-      font-weight:900;
+      position:absolute; top:16px; left:16px;
+      font-size:12px; font-weight:900;
       color:rgba(255,255,255,.82);
       background:rgba(0,0,0,.35);
       border:1px solid rgba(255,255,255,.12);
@@ -563,6 +565,7 @@
       .brand img{height:52px}
       .footerGrid{grid-template-columns:1fr}
       .footerActions{align-items:stretch}
+      .heroCardBadge{bottom:58px;}
     }
     @media (max-width:520px){
       .kakao-fixed span:last-child{display:none;}
@@ -570,171 +573,181 @@
       .venueHeadline{ font-size: 22px; }
       .venueLogos{ gap: 22px; }
       .venueLogos img{ height: 28px; }
-      .footerBrand img{height:34px}
       .timelineTime{min-width:72px;font-size:11px;}
       .lightbox{padding:14px;}
       .lbStage{height:86vh;}
       .lbNav{width:46px;height:46px;}
+      .introTitle{font-size:40px;}
     }
   </style>
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="wrap">
-      <a class="brand" href="index.html" aria-label="EM시스템 홈">
-        <img src="images/ems-logo.png" alt="EM시스템 로고">
-      </a>
-
-      <nav class="nav" aria-label="메뉴">
-        <a href="index.html" class="active">홈</a>
-        <a href="services.html">서비스</a>
-        <a href="works.html">시공사례</a>
-        <a href="about.html">강점</a>
-        <a href="contact.html">문의</a>
-        <a href="contact.html" class="cta">견적요청</a>
-      </nav>
+  <!-- ✅ 1회만 뜨는 인트로 -->
+  <div id="intro" aria-hidden="true">
+    <div class="introInner">
+      <img class="introLogo" src="images/ems-logo.png" alt="EM시스템 로고">
+      <h2 class="introTitle">FABRIC LED BOOTH</h2>
     </div>
   </div>
 
-  <main class="hero">
-    <div class="wrap heroGrid">
-      <div>
-        <div class="kicker">EXHIBITION · SIGNAGE · INFO DESK</div>
+  <!-- ✅ 메인 -->
+  <div id="main" style="display:none;">
+    <div class="topbar">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="EM시스템 홈">
+          <img src="images/ems-logo.png" alt="EM시스템 로고">
+        </a>
 
-        <h1>전시 준비,<br>한 번에 해결합니다.</h1>
-
-        <p class="lead">
-          <strong>EM시스템</strong>은 전시부스·사인물·인포데스크를
-          행사 목적과 공간 조건에 맞춰 구성합니다.<br>
-          <strong>시안 지원부터 설치·철거, 현장 대응</strong>까지 원스톱으로 진행합니다.
-        </p>
-
-        <div class="pillRow">
-          <div class="pill"><span class="pillDot"></span>빠른 견적</div>
-          <div class="pill"><span class="pillDot"></span>시안 지원</div>
-          <div class="pill"><span class="pillDot"></span>설치·철거 원스톱</div>
-        </div>
-
-        <div class="heroActions">
-          <a class="btn primary" href="contact.html">견적 문의</a>
-          <a class="btn ghost" href="services.html">서비스 보기</a>
-          <a class="btn" href="http://www.ex119.co.kr/niabbs5/" target="_blank" rel="noopener">전시렌탈119</a>
-        </div>
-      </div>
-
-      <!-- ✅ 영상 + 가운데 버튼 + 타임라인 -->
-      <div class="heroCard" id="heroCard" aria-label="대표 영상">
-        <video id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="images/fabric-booth.jpg">
-          <source src="images/hero.mp4" type="video/mp4">
-        </video>
-
-        <div class="heroCardBadge">
-          <div class="badgeTitle">One-stop Support</div>
-          <div class="badgeSub">시안 · 설치 · 철거 · 현장 대응</div>
-        </div>
-
-        <div class="videoControl" id="videoControl" aria-label="재생/정지 버튼">⏸</div>
-
-        <div class="videoTimeline" aria-label="영상 타임라인">
-          <div class="timelineTrack" id="timelineTrack" aria-label="재생 위치 조절">
-            <div class="timelineFill" id="timelineFill"></div>
-            <div class="timelineHandle" id="timelineHandle"></div>
-          </div>
-          <div class="timelineTime" id="timelineTime">00:00 / 00:00</div>
-        </div>
+        <nav class="nav" aria-label="메뉴">
+          <a href="index.html" class="active">홈</a>
+          <a href="works.html">시공사례</a>
+          <a href="services.html">서비스안내</a>
+          <a href="contact.html" class="cta">견적문의</a>
+        </nav>
       </div>
     </div>
-  </main>
 
-  <section class="block">
-    <div class="wrap">
-      <div class="sectionTitle">
-        <h2>서비스</h2>
-        <p>행사 운영에 필요한 핵심 품목을 빠르게 선택할 수 있도록 정리했습니다.</p>
-      </div>
+    <main class="hero">
+      <div class="wrap heroGrid">
+        <div>
+          <div class="kicker">EXHIBITION · SIGNAGE · INFO DESK</div>
+          <h1>전시 준비,<br>한 번에 해결합니다.</h1>
 
-      <div class="cards">
-        <article class="card">
-          <div class="media">
-            <img class="zoomable" src="images/fabric-booth.jpg" alt="페브릭 부스" loading="lazy">
-            <div class="imgHint">클릭하여 확대</div>
+          <p class="lead">
+            <strong>EM시스템</strong>은 전시부스·사인물·인포데스크를
+            행사 목적과 공간 조건에 맞춰 구성합니다.<br>
+            <strong>시안 지원부터 설치·철거, 현장 대응</strong>까지 원스톱으로 진행합니다.
+          </p>
+
+          <div class="pillRow">
+            <div class="pill"><span class="pillDot"></span>빠른 견적</div>
+            <div class="pill"><span class="pillDot"></span>시안 지원</div>
+            <div class="pill"><span class="pillDot"></span>설치·철거 원스톱</div>
           </div>
-          <div class="body">
-            <h3>페브릭 부스</h3>
-            <p>모듈형 구성으로 공간에 맞춰 유연하게 설계합니다.<br>렌탈/제작 선택 · 설치·철거 옵션 지원</p>
+
+          <div class="heroActions">
+            <a class="btn primary" href="contact.html">견적 문의</a>
+            <a class="btn ghost" href="services.html">서비스안내 보기</a>
+            <a class="btn" href="http://www.ex119.co.kr/niabbs5/" target="_blank" rel="noopener">전시렌탈119</a>
           </div>
-        </article>
+        </div>
 
-        <article class="card">
-          <div class="media">
-            <img class="zoomable" src="images/infor.png" alt="간판 인포데스크" loading="lazy">
-            <div class="imgHint">클릭하여 확대</div>
+        <!-- ✅ 유튜브(안 짤림) + 버튼 + 진행바 -->
+        <div class="heroCard" id="heroCard" aria-label="대표 영상">
+          <div class="ytBox">
+            <div id="ytStage" aria-label="유튜브 영상">
+              <div id="ytSizer"></div>
+            </div>
           </div>
-          <div class="body">
-            <h3>간판 · 인포데스크</h3>
-            <p>부스 구조와 운영 동선에 맞춰 구성합니다.<br>그래픽 적용 지원 · 빠른 설치로 현장 세팅</p>
+
+          <div class="heroCardBadge">
+            <div class="badgeTitle">One-stop Support</div>
+            <div class="badgeSub">시안 · 설치 · 철거 · 현장 대응</div>
           </div>
-        </article>
 
-        <article class="card">
-          <div class="media">
-            <img class="zoomable fit-contain" src="images/sign.png" alt="사인물" loading="lazy">
-            <div class="imgHint">클릭하여 확대</div>
+          <div class="videoControl" id="videoControl" aria-label="재생/정지 버튼">⏸</div>
+
+          <div class="videoTimeline" aria-label="영상 타임라인">
+            <div class="timelineTrack" id="timelineTrack" aria-label="재생 위치 조절">
+              <div class="timelineFill" id="timelineFill"></div>
+              <div class="timelineHandle" id="timelineHandle"></div>
+            </div>
+            <div class="timelineTime" id="timelineTime">00:00 / 00:00</div>
           </div>
-          <div class="body">
-            <h3>사인물</h3>
-            <p>안내·유도·브랜드 노출 목적에 맞춘 사인 구성을 제공합니다.<br>출력물·스탠드·배너 제작·설치 지원</p>
-          </div>
-        </article>
-      </div>
-
-      <div style="margin-top:14px;">
-        <a class="btn" href="services.html">서비스 페이지로 이동</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="wrap">
-      <div class="sectionTitle">
-        <h2>시공 사례</h2>
-        <p>다양한 전시 환경에서 진행된 일부 사례입니다. 전체는 시공사례 페이지에서 확인 가능합니다.</p>
-      </div>
-
-      <div class="galleryGrid">
-        <a class="gItem" href="works.html"><img src="images/1.jpg" alt="시공사례 1"></a>
-        <a class="gItem" href="works.html"><img src="images/2.jpg" alt="시공사례 2"></a>
-        <a class="gItem" href="works.html"><img src="images/3.jpg" alt="시공사례 3"></a>
-        <a class="gItem" href="works.html"><img src="images/4.jpg" alt="시공사례 4"></a>
-        <a class="gItem" href="works.html"><img src="images/5.jpg" alt="시공사례 5"></a>
-        <a class="gItem" href="works.html"><img src="images/6.jpg" alt="시공사례 6"></a>
-      </div>
-
-      <div style="margin-top:14px;">
-        <a class="btn primary" href="works.html">시공사례 전체 보기</a>
-      </div>
-
-      <!-- ✅ 주요 전시장 -->
-      <div class="venueWrap">
-        <div class="venueTitle">주요 시공 전시장</div>
-        <div class="venueHeadline">국내 주요 전시장 시공 경험</div>
-
-        <div class="venueLogos">
-          <img src="images/venues/coex.png" alt="COEX" loading="lazy">
-          <img src="images/venues/kintex.svg" alt="KINTEX" loading="lazy">
-          <img src="images/venues/setec.svg" alt="SETEC" loading="lazy">
-          <img src="images/venues/songdo.svg" alt="송도컨벤시아" loading="lazy">
-          <img src="images/venues/suwonmesse.png" alt="수원메쎄" loading="lazy">
         </div>
       </div>
-    </div>
-  </section>
+    </main>
 
-  <footer>
-    <div class="wrap">
-      <div class="footerCard">
-        <div class="footerTop">
+    <!-- ✅ 제품목록 -->
+    <section class="block">
+      <div class="wrap">
+        <div class="sectionTitle">
+          <h2>제품목록</h2>
+          <p>행사 운영에 필요한 핵심 품목을 빠르게 선택할 수 있도록 정리했습니다.</p>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <div class="media">
+              <img class="zoomable" src="images/fabric-booth.jpg" alt="페브릭 부스" loading="lazy">
+              <div class="imgHint">클릭하여 확대</div>
+            </div>
+            <div class="body">
+              <h3>페브릭 부스</h3>
+              <p>모듈형 구성으로 공간에 맞춰 유연하게 설계합니다.<br>렌탈/제작 선택 · 설치·철거 옵션 지원</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="media">
+              <img class="zoomable" src="images/infor.png" alt="간판 · 인포데스크" loading="lazy">
+              <div class="imgHint">클릭하여 확대</div>
+            </div>
+            <div class="body">
+              <h3>간판 · 인포데스크</h3>
+              <p>부스 구조와 운영 동선에 맞춰 구성합니다.<br>그래픽 적용 지원 · 빠른 설치로 현장 세팅</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="media">
+              <img class="zoomable fit-contain" src="images/sign.png" alt="사인물" loading="lazy">
+              <div class="imgHint">클릭하여 확대</div>
+            </div>
+            <div class="body">
+              <h3>사인물</h3>
+              <p>안내·유도·브랜드 노출 목적에 맞춘 사인 구성을 제공합니다.<br>출력물·스탠드·배너 제작·설치 지원</p>
+            </div>
+          </article>
+        </div>
+
+        <div style="margin-top:14px;">
+          <a class="btn" href="services.html">서비스안내 페이지로 이동</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ✅ 시공사례(인덱스에서 클릭=확대) -->
+    <section class="block">
+      <div class="wrap">
+        <div class="sectionTitle">
+          <h2>시공 사례</h2>
+          <p>다양한 전시 환경에서 진행된 일부 사례입니다. 이미지 클릭 시 확대됩니다.</p>
+        </div>
+
+        <div class="galleryGrid">
+          <div class="gItem"><img class="zoomable" src="images/1.jpg" alt="시공사례 1"></div>
+          <div class="gItem"><img class="zoomable" src="images/2.jpg" alt="시공사례 2"></div>
+          <div class="gItem"><img class="zoomable" src="images/3.jpg" alt="시공사례 3"></div>
+          <div class="gItem"><img class="zoomable" src="images/4.jpg" alt="시공사례 4"></div>
+          <div class="gItem"><img class="zoomable" src="images/5.jpg" alt="시공사례 5"></div>
+          <div class="gItem"><img class="zoomable" src="images/6.jpg" alt="시공사례 6"></div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <a class="btn primary" href="works.html">시공사례 전체 보기</a>
+        </div>
+
+        <!-- ✅ 주요 전시장 -->
+        <div class="venueWrap">
+          <div class="venueTitle">주요 시공 전시장</div>
+          <div class="venueHeadline">국내 주요 전시장 시공 경험</div>
+
+          <div class="venueLogos">
+            <img src="images/venues/coex.png" alt="COEX" loading="lazy">
+            <img src="images/venues/kintex.svg" alt="KINTEX" loading="lazy">
+            <img src="images/venues/setec.svg" alt="SETEC" loading="lazy">
+            <img src="images/venues/songdo.svg" alt="송도컨벤시아" loading="lazy">
+            <img src="images/venues/suwonmesse.png" alt="수원메쎄" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div class="footerCard">
           <div class="footerBrand">
             <img src="images/ems-logo.png" alt="EM시스템 로고">
             <div>
@@ -742,117 +755,102 @@
               <div class="footerBrandSub">전시부스 · 사인물 · 인포데스크 · 설치/철거</div>
             </div>
           </div>
-        </div>
 
-        <div class="footerGrid">
-          <div class="footerInfo">
-            <div><strong>대표자명</strong> 김지협</div>
-            <div><strong>사업자번호</strong> 661-81-03553</div>
-            <div><strong>운영시간</strong> 평일 09:00 ~ 18:00</div>
-            <div><strong>주소</strong> 경기도 남양주시 화도읍 재재기로71번안길 40</div>
-            <div><strong>전화</strong> <a href="tel:0315283119" style="text-decoration:none;border-bottom:1px solid rgba(255,255,255,.22)">031-528-3119</a></div>
-            <div><strong>이메일</strong> <a href="mailto:ems-system@naver.com" style="text-decoration:none;border-bottom:1px solid rgba(255,255,255,.22)">ems-system@naver.com</a></div>
+          <div class="footerGrid">
+            <div class="footerInfo">
+              <div><strong>대표자명</strong> 김지협</div>
+              <div><strong>사업자번호</strong> 661-81-03553</div>
+              <div><strong>운영시간</strong> 평일 09:00 ~ 18:00</div>
+              <div><strong>주소</strong> 경기도 남양주시 화도읍 재재기로71번안길 40</div>
+              <div><strong>전화</strong> <a href="tel:0315283119" style="text-decoration:none;border-bottom:1px solid rgba(255,255,255,.22)">031-528-3119</a></div>
+              <div><strong>이메일</strong> <a href="mailto:ems-system@naver.com" style="text-decoration:none;border-bottom:1px solid rgba(255,255,255,.22)">ems-system@naver.com</a></div>
+            </div>
+
+            <div class="footerActions">
+              <a class="fbtn primary" href="contact.html">견적 문의하기</a>
+              <a class="fbtn" href="http://www.ex119.co.kr/niabbs5/" target="_blank" rel="noopener">전시렌탈119 바로가기</a>
+              <a class="fbtn mini" href="tel:0315283119">전화 바로걸기</a>
+              <a class="fbtn mini" href="http://pf.kakao.com/_SxlTzX" target="_blank" rel="noopener">카카오톡 상담</a>
+            </div>
           </div>
 
-          <div class="footerActions">
-            <a class="fbtn primary" href="http://www.ex119.co.kr/niabbs5/" target="_blank" rel="noopener">
-              전시렌탈119 바로가기
-            </a>
-
-            <a class="fbtn" href="https://map.naver.com/v5/search/%EA%B2%BD%EA%B8%B0%EB%8F%84%20%EB%82%A8%EC%96%91%EC%A3%BC%EC%8B%9C%20%ED%99%94%EB%8F%84%EC%9D%8D%20%EC%9E%AC%EC%9E%AC%EA%B8%B0%EB%A1%9C71%EB%B2%88%EC%95%88%EA%B8%B8%2040" target="_blank" rel="noopener">
-              네이버지도에서 위치 보기
-            </a>
-
-            <a class="fbtn mini" href="tel:0315283119">
-              전화 바로걸기
-            </a>
-
-            <a class="fbtn mini" href="http://pf.kakao.com/_SxlTzX" target="_blank" rel="noopener">
-              카카오톡 상담
-            </a>
+          <div class="footerBottom">
+            <div>© <span id="year"></span> EMSystem. All rights reserved.</div>
+            <div style="color:rgba(255,255,255,.45)">EMSystem · Exhibition Rental & Installation</div>
           </div>
         </div>
+      </div>
+    </footer>
 
-        <div class="footerBottom">
-          <div>© <span id="year"></span> EMSystem. All rights reserved.</div>
-          <div style="color:rgba(255,255,255,.45)">EMSystem · Exhibition Rental & Installation</div>
-        </div>
+    <a class="kakao-fixed" href="http://pf.kakao.com/_SxlTzX" target="_blank" rel="noopener">
+      <span class="kakao-dot"></span>
+      <span>카카오 상담</span>
+    </a>
+
+    <!-- ✅ 라이트박스(공용) -->
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+      <div class="lbStage" id="lbStage">
+        <div class="lbCounter" id="lbCounter">1 / 1</div>
+        <button class="lbClose" id="lbClose" type="button" aria-label="닫기">✕</button>
+        <button class="lbNav lbPrev" id="lbPrev" type="button" aria-label="이전">‹</button>
+        <button class="lbNav lbNext" id="lbNext" type="button" aria-label="다음">›</button>
+        <img class="lbImg" id="lbImg" alt="확대 이미지">
+        <div class="lbHint" id="lbHint">마우스휠: 확대/축소 · 드래그: 이동 · 좌/우 키: 이동 · ESC: 닫기</div>
       </div>
     </div>
-  </footer>
+  </div><!-- /#main -->
 
-  <!-- ✅ 우측 하단 카카오 고정 -->
-  <a class="kakao-fixed" href="http://pf.kakao.com/_SxlTzX" target="_blank" rel="noopener">
-    <span class="kakao-dot"></span>
-    <span>카카오 상담</span>
-  </a>
-
-  <!-- ✅ 서비스 이미지 확대(라이트박스) -->
-  <div class="lightbox" id="lightbox" aria-hidden="true">
-    <div class="lbStage" id="lbStage">
-      <div class="lbCounter" id="lbCounter">1 / 3</div>
-      <button class="lbClose" id="lbClose" type="button" aria-label="닫기">✕</button>
-      <button class="lbNav lbPrev" id="lbPrev" type="button" aria-label="이전">‹</button>
-      <button class="lbNav lbNext" id="lbNext" type="button" aria-label="다음">›</button>
-
-      <img class="lbImg" id="lbImg" alt="확대 이미지">
-      <div class="lbHint" id="lbHint">
-        마우스휠: 확대/축소 · 드래그: 이동 · 좌/우 키: 이미지 이동 · ESC: 닫기
-      </div>
-    </div>
-  </div>
+  <!-- ✅ YouTube Iframe API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // 연도
+    // ✅ 연도
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // ✅ HERO 영상 재생/정지 + 타임라인
-    const card = document.getElementById("heroCard");
-    const video = document.getElementById("heroVideo");
-    const control = document.getElementById("videoControl");
+    // ✅ 인트로 1회만 (강제: ?intro=1)
+    (function(){
+      const INTRO_KEY = "ems_intro_seen_v2";
+      const intro = document.getElementById("intro");
+      const main = document.getElementById("main");
 
+      const forceIntro = new URLSearchParams(location.search).get("intro") === "1";
+      const seen = !forceIntro && localStorage.getItem(INTRO_KEY) === "1";
+
+      if(seen){
+        intro.style.display = "none";
+        main.style.display = "block";
+      }else{
+        localStorage.setItem(INTRO_KEY, "1");
+        setTimeout(()=>{
+          intro.style.display = "none";
+          main.style.display = "block";
+        }, 1100);
+      }
+    })();
+
+    // ✅ HERO hover 대체(터치)
+    const heroCard = document.getElementById("heroCard");
+    let touchMode = false;
+    heroCard.addEventListener("touchstart", () => {
+      if (!touchMode){
+        touchMode = true;
+        heroCard.classList.add("is-touch");
+      }
+    }, { passive:true });
+
+    // ✅ YouTube Player + 컨트롤(재생/정지 + 진행바)
+    let player;
+    const videoId = "qFCeqlV-xsM";
+
+    const control = document.getElementById("videoControl");
     const track = document.getElementById("timelineTrack");
     const fill = document.getElementById("timelineFill");
     const handle = document.getElementById("timelineHandle");
     const timeEl = document.getElementById("timelineTime");
 
-    // 터치기기 hover 대체
-    let touchMode = false;
-    card.addEventListener("touchstart", () => {
-      if (!touchMode){
-        touchMode = true;
-        card.classList.add("is-touch");
-      }
-    }, { passive:true });
-
-    function setBtn(){
-      control.textContent = video.paused ? "▶" : "⏸";
-    }
-
-    async function safePlay(){
-      try { await video.play(); } catch(e) {}
-      setBtn();
-    }
-
-    function toggleVideo(){
-      if(video.paused) safePlay();
-      else { video.pause(); setBtn(); }
-    }
-
-    control.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleVideo();
-    });
-    video.addEventListener("click", toggleVideo);
-
-    // 화면에 보일 때만 재생 (40% 이상 보이면 재생, 아니면 정지)
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if(entry.isIntersecting) safePlay();
-        else { video.pause(); setBtn(); }
-      });
-    }, { threshold: 0.4 });
-    observer.observe(video);
+    let duration = 0;
+    let ticker = null;
+    let dragging = false;
 
     function fmt(sec){
       if(!isFinite(sec)) return "00:00";
@@ -862,76 +860,144 @@
       return `${m}:${s}`;
     }
 
-    function updateTimeline(){
-      const d = video.duration || 0;
-      const t = video.currentTime || 0;
-      const pct = d ? (t / d) * 100 : 0;
+    function setBtn(){
+      if(!player) return;
+      const st = player.getPlayerState();
+      control.textContent = (st === 1) ? "⏸" : "▶";
+    }
 
+    function updateTimeline(){
+      if(!player || dragging) return;
+      const t = player.getCurrentTime ? player.getCurrentTime() : 0;
+      const d = duration || (player.getDuration ? player.getDuration() : 0);
+      if(d && !duration) duration = d;
+
+      const pct = d ? (t / d) * 100 : 0;
       fill.style.width = `${pct}%`;
       handle.style.left = `${pct}%`;
       timeEl.textContent = `${fmt(t)} / ${fmt(d)}`;
       setBtn();
     }
 
-    video.addEventListener("timeupdate", updateTimeline);
-    video.addEventListener("loadedmetadata", updateTimeline);
-    video.addEventListener("play", setBtn);
-    video.addEventListener("pause", setBtn);
-
-    // 타임라인 클릭/드래그로 이동
-    let dragging = false;
-
     function seekByClientX(clientX){
+      if(!player || !duration) return;
       const rect = track.getBoundingClientRect();
       const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
       const ratio = rect.width ? x / rect.width : 0;
-      const d = video.duration || 0;
-      if(d){
-        video.currentTime = ratio * d;
-      }
+      player.seekTo(ratio * duration, true);
       updateTimeline();
     }
+
+    function toggleVideo(){
+      if(!player) return;
+      const st = player.getPlayerState();
+      if(st === 1) player.pauseVideo();
+      else player.playVideo();
+      setBtn();
+    }
+
+    function startTick(){
+      if(ticker) return;
+      ticker = setInterval(updateTimeline, 250);
+    }
+
+    // ✅ 유튜브 "절대 안 짤리게" 16:9 contain 리사이즈
+    function fitYouTube(){
+      const stage = document.getElementById("ytStage");
+      const sizer = document.getElementById("ytSizer");
+      if(!stage || !sizer) return;
+
+      const rect = stage.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      const AR = 16/9;
+      const stageAR = W / H;
+
+      let w, h;
+      if(stageAR > AR){
+        // 무대가 더 넓음 -> 높이에 맞추고 좌우 여백
+        h = H;
+        w = H * AR;
+      }else{
+        // 무대가 더 좁음 -> 너비에 맞추고 상하 여백
+        w = W;
+        h = W / AR;
+      }
+
+      sizer.style.width = `${w}px`;
+      sizer.style.height = `${h}px`;
+    }
+
+    window.addEventListener("resize", fitYouTube);
+
+    // ✅ YouTube API
+    window.onYouTubeIframeAPIReady = function(){
+      player = new YT.Player("ytSizer", {
+        videoId,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          mute: 1
+        },
+        events: {
+          onReady: function(){
+            duration = player.getDuration();
+            setBtn();
+            updateTimeline();
+            startTick();
+            fitYouTube();
+            setTimeout(fitYouTube, 200);
+            setTimeout(fitYouTube, 600);
+          },
+          onStateChange: function(){ setBtn(); }
+        }
+      });
+    };
+
+    control.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleVideo();
+    });
 
     track.addEventListener("mousedown", (e) => {
       dragging = true;
       seekByClientX(e.clientX);
     });
-
     window.addEventListener("mousemove", (e) => {
       if(!dragging) return;
       seekByClientX(e.clientX);
     });
-
     window.addEventListener("mouseup", () => {
       dragging = false;
     });
 
-    // 모바일 터치 드래그
     track.addEventListener("touchstart", (e) => {
       dragging = true;
       seekByClientX(e.touches[0].clientX);
     }, { passive:true });
-
     window.addEventListener("touchmove", (e) => {
       if(!dragging) return;
       if(!e.touches || !e.touches[0]) return;
       seekByClientX(e.touches[0].clientX);
     }, { passive:true });
-
     window.addEventListener("touchend", () => {
       dragging = false;
     });
 
-    // ✅ 서비스 라이트박스: 좌/우 넘기기 + 휠 줌 + 드래그 이동
+    // ✅ 공용 라이트박스: index 안의 모든 img.zoomable 확대
     const lightbox = document.getElementById("lightbox");
-    const lbStage = document.getElementById("lbStage");
     const lbImg = document.getElementById("lbImg");
     const lbCounter = document.getElementById("lbCounter");
     const btnClose = document.getElementById("lbClose");
     const btnPrev = document.getElementById("lbPrev");
     const btnNext = document.getElementById("lbNext");
+    const lbStage = document.getElementById("lbStage");
 
-    const zoomables = Array.from(document.querySelectorAll(".cards .media img.zoomable"));
+    const zoomables = Array.from(document.querySelectorAll("img.zoomable"));
     const items = zoomables.map(img => ({
       src: img.getAttribute("src"),
       alt: img.getAttribute("alt") || "확대 이미지"
@@ -939,36 +1005,13 @@
 
     let currentIndex = 0;
 
-    // transform 상태(줌/이동)
-    let scale = 1;
-    let tx = 0;
-    let ty = 0;
+    let scale = 1, tx = 0, ty = 0;
+    let isPanning = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
 
-    // 드래그 상태
-    let isPanning = false;
-    let startX = 0;
-    let startY = 0;
-    let startTx = 0;
-    let startTy = 0;
-
-    function clamp(val, min, max){
-      return Math.min(Math.max(val, min), max);
-    }
-
-    function applyTransform(){
-      lbImg.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
-    }
-
-    function resetTransform(){
-      scale = 1;
-      tx = 0;
-      ty = 0;
-      applyTransform();
-    }
-
-    function updateCounter(){
-      lbCounter.textContent = `${currentIndex + 1} / ${items.length}`;
-    }
+    function clamp(val, min, max){ return Math.min(Math.max(val, min), max); }
+    function applyTransform(){ lbImg.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`; }
+    function resetTransform(){ scale = 1; tx = 0; ty = 0; applyTransform(); }
+    function updateCounter(){ lbCounter.textContent = `${currentIndex + 1} / ${items.length}`; }
 
     function showImage(idx){
       currentIndex = (idx + items.length) % items.length;
@@ -996,7 +1039,6 @@
     function nextImage(){ showImage(currentIndex + 1); }
     function prevImage(){ showImage(currentIndex - 1); }
 
-    // 이미지 클릭 → 열기
     zoomables.forEach((img, idx) => {
       img.addEventListener("click", (e) => {
         e.preventDefault();
@@ -1004,168 +1046,61 @@
       });
     });
 
-    // 버튼
     btnClose.addEventListener("click", (e) => { e.stopPropagation(); closeLightbox(); });
     btnNext.addEventListener("click", (e) => { e.stopPropagation(); nextImage(); });
     btnPrev.addEventListener("click", (e) => { e.stopPropagation(); prevImage(); });
 
-    // 바깥 클릭하면 닫기 (이미지/버튼 클릭은 제외)
-    lightbox.addEventListener("click", (e) => {
-      if(e.target === lightbox) closeLightbox();
-    });
+    lightbox.addEventListener("click", (e) => { if(e.target === lightbox) closeLightbox(); });
 
-    // 키보드: 좌/우/ESC
     window.addEventListener("keydown", (e) => {
       if(!lightbox.classList.contains("open")) return;
       if(e.key === "Escape") closeLightbox();
       if(e.key === "ArrowRight") nextImage();
       if(e.key === "ArrowLeft") prevImage();
-      if(e.key === "0"){ resetTransform(); } // 0 누르면 리셋(숨은 편의)
+      if(e.key === "0") resetTransform();
     });
 
-    // 휠 줌 (커서 위치 기준)
     lbStage.addEventListener("wheel", (e) => {
       if(!lightbox.classList.contains("open")) return;
       e.preventDefault();
 
       const rect = lbImg.getBoundingClientRect();
-      const cx = e.clientX - rect.left; // 이미지 내부 좌표
+      const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
 
-      // 현재 transform 기준으로 이미지 좌표계 보정
       const prevScale = scale;
       const delta = -e.deltaY;
       const zoomFactor = delta > 0 ? 1.12 : 1 / 1.12;
       scale = clamp(scale * zoomFactor, 1, 4);
 
-      // scale 변화에 따른 이동 보정 (커서 아래 지점 유지)
       const scaleChange = scale / prevScale;
-
-      // 이미지 중심 기준 이동 보정
       const dx = (cx - rect.width / 2);
       const dy = (cy - rect.height / 2);
-
       tx = tx - dx * (scaleChange - 1);
       ty = ty - dy * (scaleChange - 1);
 
       applyTransform();
     }, { passive:false });
 
-    // 드래그 이동
     lbImg.addEventListener("mousedown", (e) => {
       if(!lightbox.classList.contains("open")) return;
-      if(scale <= 1) return; // 확대 안 됐을 땐 이동 불필요
+      if(scale <= 1) return;
       isPanning = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      startTx = tx;
-      startTy = ty;
+      startX = e.clientX; startY = e.clientY;
+      startTx = tx; startTy = ty;
       e.preventDefault();
     });
 
     window.addEventListener("mousemove", (e) => {
       if(!isPanning) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      tx = startTx + dx;
-      ty = startTy + dy;
+      tx = startTx + (e.clientX - startX);
+      ty = startTy + (e.clientY - startY);
       applyTransform();
     });
 
-    window.addEventListener("mouseup", () => {
-      isPanning = false;
-    });
+    window.addEventListener("mouseup", () => { isPanning = false; });
 
-    // 더블클릭: 줌 리셋
-    lbImg.addEventListener("dblclick", (e) => {
-      e.preventDefault();
-      resetTransform();
-    });
-
-    // 모바일: 스와이프(좌/우), 핀치는 생략(복잡해져서) + 드래그 이동(확대 시)
-    let touchStartX = 0, touchStartY = 0, touchMoved = false;
-
-    lbStage.addEventListener("touchstart", (e) => {
-      if(!lightbox.classList.contains("open")) return;
-      if(!e.touches || !e.touches[0]) return;
-
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      touchMoved = false;
-
-      // 확대 상태면 드래그 이동 시작
-      if(scale > 1){
-        isPanning = true;
-        startX = touchStartX;
-        startY = touchStartY;
-        startTx = tx;
-        startTy = ty;
-      }
-    }, { passive:true });
-
-    lbStage.addEventListener("touchmove", (e) => {
-      if(!lightbox.classList.contains("open")) return;
-      if(!e.touches || !e.touches[0]) return;
-      const x = e.touches[0].clientX;
-      const y = e.touches[0].clientY;
-
-      const dx = x - touchStartX;
-      const dy = y - touchStartY;
-
-      if(Math.abs(dx) > 6 || Math.abs(dy) > 6) touchMoved = true;
-
-      // 확대 상태면 패닝
-      if(isPanning && scale > 1){
-        tx = startTx + (x - startX);
-        ty = startTy + (y - startY);
-        applyTransform();
-      }
-    }, { passive:true });
-
-    lbStage.addEventListener("touchend", () => {
-      if(!lightbox.classList.contains("open")) return;
-
-      // 스와이프(확대 안 했을 때만)
-      if(scale <= 1 && touchMoved){
-        const dx = (startX ? (startX - touchStartX) : 0);
-      }
-
-      isPanning = false;
-
-      // 단순 스와이프 판정(확대 아닐 때)
-      // touchstart 값이 startX에 덮이기 때문에 따로 다시 계산
-      // => 안전하게 마지막 이동량 기록 방식 대신 간단 판정으로 구현
-    });
-
-    // 간단 스와이프(확대 아닐 때): touchstart/touchend 비교
-    let swipeStartX = 0, swipeStartY = 0;
-    lbStage.addEventListener("touchstart", (e) => {
-      if(!lightbox.classList.contains("open")) return;
-      if(!e.touches || !e.touches[0]) return;
-      swipeStartX = e.touches[0].clientX;
-      swipeStartY = e.touches[0].clientY;
-    }, { passive:true });
-
-    lbStage.addEventListener("touchend", (e) => {
-      if(!lightbox.classList.contains("open")) return;
-      if(scale > 1) return; // 확대 중엔 스와이프 넘김 비활성
-      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
-      if(!t) return;
-
-      const dx = t.clientX - swipeStartX;
-      const dy = t.clientY - swipeStartY;
-
-      if(Math.abs(dx) > 40 && Math.abs(dy) < 40){
-        if(dx < 0) nextImage();
-        else prevImage();
-      }
-    }, { passive:true });
-
-    // 라이트박스 열려있을 때 stage 클릭 시 닫지 않음(사용자 실수 방지)
-    lbStage.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
+    lbImg.addEventListener("dblclick", (e) => { e.preventDefault(); resetTransform(); });
   </script>
 </body>
-
 </html>
