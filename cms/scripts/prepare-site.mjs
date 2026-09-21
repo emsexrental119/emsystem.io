@@ -14,6 +14,7 @@ if(cmsOrigin)fetch(cmsOrigin+'/api/public/content',{signal:AbortSignal.timeout(5
 function useCMSContent(){const [data,setData]=y.useState(cmsContent);y.useEffect(()=>{const update=()=>setData(cmsContent);cmsListeners.add(update);update();return()=>cmsListeners.delete(update)},[]);return data;}
 function cmsImage(src){return src.startsWith('/media/')?cmsOrigin+src:src;}
 `;
+replace('c.jsx("div",{style:{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:64', 'c.jsx("a",{href:"/admin/",style:{display:"inline-block",fontSize:11,color:"#888",marginTop:24,textDecoration:"none"},children:"관리자 로그인"}),c.jsx("div",{style:{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:64');
 replace('function HeroRotatingBackground({backgroundRef}){',helper+'function HeroRotatingBackground({backgroundRef}){const cms=useCMSContent(),images=cms?cms.hero.images.map(p=>cmsImage(p.src)):[1,2,3].map(n=>"/images/hero/exhibition-"+n+".jpg");');
 replace('setIndex(n=>(n+1)%3)','setIndex(n=>(n+1)%images.length)');
 replace('},[reduced]);return c.jsx("div",{ref:backgroundRef','},[reduced,images.length]);return c.jsx("div",{ref:backgroundRef');
