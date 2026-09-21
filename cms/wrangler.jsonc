@@ -1,0 +1,10 @@
+{
+  "name": "emsystem-admin",
+  "main": "worker.mjs",
+  "tsconfig": "./tsconfig.json",
+  "compatibility_date": "2026-09-01",
+  "assets": {"directory": "./public", "binding": "ASSETS", "run_worker_first": true},
+  "account_id": "77d4808e668ba9f92913340cac38cdab",
+  "d1_databases": [{"binding": "DB", "database_name": "emsystem-content", "database_id": "d3fcea94-ceab-4f7e-b69a-2caf892afbf1", "migrations_dir": "migrations"}],
+  "vars": {"ADMIN_USERNAME": "exrental119", "SITE_ORIGIN": "https://emsystem.co.kr"}
+}

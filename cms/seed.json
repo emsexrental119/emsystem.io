@@ -1,0 +1,501 @@
+{
+  "works": [
+    {
+      "id": "jdcom-epicgames-parnas",
+      "title": "JD컴 에픽게임즈 행사",
+      "venue": "파라나스호텔",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/1.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 게임 체험 부스 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/2.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 게임 체험 부스 정면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/3.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 등록 데스크 백월 측면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/4.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 행사 안내 현황판"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/5.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 등록 데스크 백월 정면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/6.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 게임 전시 백월 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/7.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 게임 전시 백월 정면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/8.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 행사장 체험 공간"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/jdcom-epicgames-parnas/9.jpg",
+          "alt": "JD컴 에픽게임즈 행사 - 게임 체험 부스"
+        }
+      ]
+    },
+    {
+      "id": "kocla-2026",
+      "title": "캐릭터페어 (KOCLA)",
+      "venue": "COEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/kocla-2026/1.jpg",
+          "alt": "KOCLA 부스 백월 (한국문화콘텐츠라이센싱협회)"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/kocla-2026/2.jpg",
+          "alt": "부스 라이트박스·사인보드"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/kocla-2026/3.jpg",
+          "alt": "부스 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/kocla-2026/4.jpg",
+          "alt": "부스 전경 (측면)"
+        }
+      ]
+    },
+    {
+      "id": "intercharm-2026",
+      "title": "인터참코리아 2026",
+      "venue": "COEX",
+      "date": "2026.07.01-03",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-2026/1.jpg",
+          "alt": "Hall 현황판·브랜드리스트"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-2026/2.jpg",
+          "alt": "THE RISING AWARDS 안내판"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-2026/3.jpg",
+          "alt": "스폰서 배너"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-2026/4.jpg",
+          "alt": "Hall 현황판"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-2026/5.jpg",
+          "alt": "Badge Pickup 키오스크존"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-2026/6.jpg",
+          "alt": "Registration 데스크"
+        }
+      ]
+    },
+    {
+      "id": "seoulfood-2026",
+      "title": "서울푸드 2026",
+      "venue": "KINTEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/seoulfood-2026/1.jpg",
+          "alt": "옥타 백릿 사인보드"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/seoulfood-2026/2.jpg",
+          "alt": "옥타 백릿 사인보드"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/seoulfood-2026/3.jpg",
+          "alt": "안내(INFORMATION) 백월"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/seoulfood-2026/4.jpg",
+          "alt": "지원센터 부스배치도"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/seoulfood-2026/5.jpg",
+          "alt": "지원센터 부스배치도"
+        }
+      ]
+    },
+    {
+      "id": "fairmont-asean-2026",
+      "title": "ASEAN Women MSMEs Acceleration EXPO",
+      "venue": "여의도 페어몬트 앰배서더",
+      "date": "2026.08.25-26",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/fairmont-asean-2026/1.jpg",
+          "alt": "ASEAN Women MSMEs Acceleration EXPO - 행사 백월 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/fairmont-asean-2026/2.jpg",
+          "alt": "ASEAN Women MSMEs Acceleration EXPO - 그린 백월 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/fairmont-asean-2026/3.jpg",
+          "alt": "ASEAN Women MSMEs Acceleration EXPO - 그린 백월 정면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/fairmont-asean-2026/4.jpg",
+          "alt": "ASEAN Women MSMEs Acceleration EXPO - 행사 백월 우측"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/fairmont-asean-2026/5.jpg",
+          "alt": "ASEAN Women MSMEs Acceleration EXPO - 행사 백월 좌측"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/fairmont-asean-2026/6.jpg",
+          "alt": "ASEAN Women MSMEs Acceleration EXPO - 행사 백월 정면"
+        }
+      ]
+    },
+    {
+      "id": "cphi-medicro",
+      "title": "CPHI 매디크로 부스",
+      "venue": "COEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/cphi-medicro/1.jpg",
+          "alt": "CPHI 매디크로 부스 - 부스 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/cphi-medicro/2.jpg",
+          "alt": "CPHI 매디크로 부스 - 부스 측면 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/cphi-medicro/3.jpg",
+          "alt": "CPHI 매디크로 부스 - 상담 공간과 인포데스크"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/cphi-medicro/4.jpg",
+          "alt": "CPHI 매디크로 부스 - 부스 정면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/cphi-medicro/5.jpg",
+          "alt": "CPHI 매디크로 부스 - LED 백월·인포데스크"
+        }
+      ]
+    },
+    {
+      "id": "samsung-aimedbio-parnas",
+      "title": "삼성서울병원×에임드바이오 행사",
+      "venue": "파라나스호텔",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/samsung-aimedbio-parnas/1.jpg",
+          "alt": "삼성서울병원×에임드바이오 행사 - 행사장 백월 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/samsung-aimedbio-parnas/2.jpg",
+          "alt": "삼성서울병원×에임드바이오 행사 - LED 백월과 상담 테이블"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/samsung-aimedbio-parnas/3.jpg",
+          "alt": "삼성서울병원×에임드바이오 행사 - LED 백월 상세"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/samsung-aimedbio-parnas/4.jpg",
+          "alt": "삼성서울병원×에임드바이오 행사 - LED 백월 정면"
+        }
+      ]
+    },
+    {
+      "id": "agrifood-roadshow-2026",
+      "title": "2026 농식품 금융·투자 로드쇼",
+      "venue": "드래곤시티",
+      "date": "2026.09.09",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/agrifood-roadshow-2026/1.jpg",
+          "alt": "2026 농식품 금융·투자 로드쇼 - 행사장 전체 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/agrifood-roadshow-2026/2.jpg",
+          "alt": "2026 농식품 금융·투자 로드쇼 - 기업 소개 라이트박스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/agrifood-roadshow-2026/3.jpg",
+          "alt": "2026 농식품 금융·투자 로드쇼 - 무대와 전시 라이트박스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/agrifood-roadshow-2026/4.jpg",
+          "alt": "2026 농식품 금융·투자 로드쇼 - 기업 전시 공간"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/agrifood-roadshow-2026/5.jpg",
+          "alt": "2026 농식품 금융·투자 로드쇼 - 로비 안내 백월·배너"
+        }
+      ]
+    },
+    {
+      "id": "gamex-mediclus",
+      "title": "GAMEX 메디클러스 부스",
+      "venue": "COEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/gamex-mediclus/1.jpg",
+          "alt": "GAMEX 메디클러스 부스 - 제품 홍보 사인물"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/gamex-mediclus/2.jpg",
+          "alt": "GAMEX 메디클러스 부스 - 부스 전경"
+        }
+      ]
+    },
+    {
+      "id": "investment-insight-2026",
+      "title": "2026 투자 인사이트 포럼",
+      "venue": "COEX",
+      "date": "2026.09.19",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/1.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 행사장 복도 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/2.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 이벤트 홍보 백월"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/3.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 포토존 LED 백월 정면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/4.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 포토존 LED 백월 측면"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/5.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 체험 부스 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/6.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 상담 부스와 인포데스크"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/investment-insight-2026/7.jpg",
+          "alt": "2026 투자 인사이트 포럼 - 행사 포토존"
+        }
+      ]
+    },
+    {
+      "id": "odc26-seoul",
+      "title": "ODC26 서울",
+      "venue": "차바이오컴플렉스",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/1.jpg",
+          "alt": "ODC26 서울 - 참가기업 전시부스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/2.jpg",
+          "alt": "ODC26 서울 - ProbaLabs·novaprotein 부스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/3.jpg",
+          "alt": "ODC26 서울 - 기업 부스 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/4.jpg",
+          "alt": "ODC26 서울 - 전시부스 및 홍보 디스플레이"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/5.jpg",
+          "alt": "ODC26 서울 - CELLAMES 부스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/6.jpg",
+          "alt": "ODC26 서울 - L&C Bio·Leica 부스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/7.jpg",
+          "alt": "ODC26 서울 - 로비 전시부스 전경"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/8.jpg",
+          "alt": "ODC26 서울 - YOUNGSCIENCE·Qkine 부스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/odc26-seoul/9.jpg",
+          "alt": "ODC26 서울 - 전시장 전체 구성"
+        }
+      ]
+    },
+    {
+      "id": "ciie-2026",
+      "title": "CIIE 한국설명회",
+      "venue": "COEX",
+      "date": "2026.04.09",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/ciie-2026/1.jpg",
+          "alt": "LED 백월·사인보드 (CIIE 한국설명회)"
+        }
+      ]
+    },
+    {
+      "id": "ifs-2026",
+      "title": "IFS 프랜차이즈 박람회",
+      "venue": "COEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/ifs-2026/1.jpg",
+          "alt": "LED 백월·TV월 (BFT)"
+        }
+      ]
+    },
+    {
+      "id": "job-fair-2026",
+      "title": "2026 대한민국 상생 채용박람회",
+      "venue": "COEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/job-fair-2026/1.jpg",
+          "alt": "이력서 사진촬영 부스 안내"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/job-fair-2026/2.jpg",
+          "alt": "잡컨설팅 라이트박스 배너"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/job-fair-2026/3.jpg",
+          "alt": "잡컨설팅 라이트박스 배너"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/job-fair-2026/4.jpg",
+          "alt": "휴게라운지 인포데스크"
+        }
+      ]
+    },
+    {
+      "id": "stk-2026",
+      "title": "스마트테크코리아 2026",
+      "venue": "COEX",
+      "date": "2026.06.10-12",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/stk-2026/1.jpg",
+          "alt": "부스배치도 현황판"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/stk-2026/2.jpg",
+          "alt": "3F 부스배치도 라이트박스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/stk-2026/3.jpg",
+          "alt": "Show Overview 현황판"
+        }
+      ]
+    },
+    {
+      "id": "intercharm-booth",
+      "title": "인터참코리아 자사부스(EM시스템)",
+      "venue": "COEX",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/intercharm-booth/1.jpg",
+          "alt": "자사 LED 패브릭 부스 (EM시스템)"
+        }
+      ]
+    },
+    {
+      "id": "iden-2026",
+      "title": "IDEN 학회",
+      "venue": "그랜드 워커힐 서울",
+      "date": "",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/iden-2026/1.jpg",
+          "alt": "대형 LED 백월 (WAYMED ENDO)"
+        }
+      ]
+    },
+    {
+      "id": "maison-2026",
+      "title": "THE MAISON 2026",
+      "venue": "COEX",
+      "date": "2026.06.25-28",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/maison-2026/1.jpg",
+          "alt": "현황판 라이트박스"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/maison-2026/2.jpg",
+          "alt": "TICKET·VIP 안내데스크"
+        },
+        {
+          "src": "https://emsystem.co.kr/images/works/maison-2026/3.jpg",
+          "alt": "REGISTRATION 백월"
+        }
+      ]
+    },
+    {
+      "id": "dental-2026",
+      "title": "치과학회 세미나",
+      "venue": "COEX",
+      "date": "2026.05",
+      "visible": true,
+      "images": [
+        {
+          "src": "https://emsystem.co.kr/images/works/dental-2026/1.jpg",
+          "alt": "치과학회 대형 백월"
+        }
+      ]
+    }
+  ],
+  "hero": {
+    "title": "전시의\n완성도를\n높이다",
+    "description": "",
+    "images": [
+      {
+        "src": "https://emsystem.co.kr/images/hero/exhibition-1.jpg",
+        "alt": ""
+      },
+      {
+        "src": "https://emsystem.co.kr/images/hero/exhibition-2.jpg",
+        "alt": ""
+      },
+      {
+        "src": "https://emsystem.co.kr/images/hero/exhibition-3.jpg",
+        "alt": ""
+      }
+    ]
+  }
+}

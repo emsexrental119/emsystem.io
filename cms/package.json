@@ -1,0 +1,14 @@
+{
+  "name": "emsystem-admin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --require ./scripts/wrangler.cjs node_modules/wrangler/wrangler-dist/cli.js dev",
+    "deploy": "node --require ./scripts/wrangler.cjs node_modules/wrangler/wrangler-dist/cli.js deploy",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild-wasm": "^0.28.2",
+    "wrangler": "^4.0.0"
+  }
+}
