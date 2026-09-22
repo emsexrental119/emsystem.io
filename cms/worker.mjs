@@ -1,4 +1,7 @@
 import seed from './seed.json' with { type: 'json' };
+import serviceDefaults from './services-defaults.json' with { type: 'json' };
+
+const withServices = data => ({...data, services:data.services ?? structuredClone(serviceDefaults)});
 
 const encoder = new TextEncoder();
 const cookieName = '__Host-ems-admin';
@@ -94,7 +97,10 @@ export function validateContent(data) {
     return {id, title:field(w.title, 120, true), venue:field(w.venue,120,true), date:field(w.date,80), visible:w.visible, images:w.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))};
   });
   if (data.hero.images.length < 1 || data.hero.images.length > 20) fail('메인 배경 사진은 1~20장까지 등록할 수 있습니다.');
-  return {works, hero:{title:field(data.hero.title,120,true), description:field(data.hero.description,500), images:data.hero.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))}};
+  const entries = data.services ?? serviceDefaults;
+  if (!Array.isArray(entries) || entries.length !== 8) fail('메인 소개는 8개 항목으로 구성됩니다.');
+  const services = entries.map((s,i) => ({num:serviceDefaults[i].num, title:field(s.title,120,true), subtitle:field(s.subtitle,200), desc:field(s.desc,1500), btn:field(s.btn,80,true), to:serviceDefaults[i].to, img:validImage(s.img)}));
+  return {works, services, hero:{title:field(data.hero.title,120,true), description:field(data.hero.description,500), images:data.hero.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))}};
 }
 async function ensureContent(env) {
   const text = JSON.stringify(seed); const now = Date.now();
@@ -126,7 +132,7 @@ async function route(request, env) {
     await ensureContent(env);
     const row = await env.DB.prepare('SELECT published_json FROM content WHERE id=1').first();
     const data = JSON.parse(row.published_json); data.works = data.works.filter(w => w.visible);
-    return json(data,200,{'Access-Control-Allow-Origin':'*'});
+    return json(withServices(data),200,{'Access-Control-Allow-Origin':'*'});
   }
   if (path.startsWith('/media/') && (method === 'GET' || method === 'HEAD')) {
     validImage(path);
@@ -148,13 +154,19 @@ async function route(request, env) {
     if (path === '/api/admin/content' && method === 'GET') {
       await ensureContent(env);
       const r = await env.DB.prepare('SELECT draft_json, revision, updated_at, published_at FROM content WHERE id=1').first();
-      return json({content:JSON.parse(r.draft_json),revision:r.revision,updatedAt:r.updated_at,publishedAt:r.published_at});
+      return json({content:withServices(JSON.parse(r.draft_json)),revision:r.revision,updatedAt:r.updated_at,publishedAt:r.published_at});
     }
     if ((path === '/api/admin/content' && method === 'PUT') || (path === '/api/admin/publish' && method === 'POST')) {
-      const data = await readJSON(request); const content = validateContent(data.content);
+      const data = await readJSON(request);
+      // Older open admin tabs must preserve the newly editable section when saving.
+      if (data.content && data.content.services === undefined) {
+        const previous = await env.DB.prepare('SELECT draft_json FROM content WHERE id=1').first();
+        data.content.services = withServices(previous ? JSON.parse(previous.draft_json) : seed).services;
+      }
+      const content = validateContent(data.content);
       if (!Number.isSafeInteger(data.revision)) fail('새로고침 후 다시 시도해 주세요.');
       // Verify uploaded media before saving, so failed uploads can never enter a published record.
-      const media = [...new Set([...content.hero.images,...content.works.flatMap(w => w.images)].map(i=>i.src).filter(s=>s.startsWith('/media/')))];
+      const media = [...new Set([...content.hero.images,...content.works.flatMap(w => w.images),...content.services.map(s=>({src:s.img}))].map(i=>i.src).filter(s=>s.startsWith('/media/')))];
       if (env.IMAGES) {
         for (const src of media) if (!await images(env).head(src.slice(7))) fail('업로드가 완료되지 않은 사진이 있습니다.');
       } else if (media.length) {

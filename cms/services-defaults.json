@@ -1,0 +1,74 @@
+[
+  {
+    "num": "01",
+    "title": "EMSYSTEM",
+    "subtitle": "전시의 완성도를 높이다",
+    "desc": "패브릭 부스·사인물·인포데스크를 행사 목적과 공간 조건에 맞춰 구성합니다. 시안 지원부터 설치·철거, 현장 대응까지 원스톱으로 진행합니다.",
+    "btn": "견적 문의",
+    "to": "/contact",
+    "img": "https://emsystem.co.kr/images/1.jpg"
+  },
+  {
+    "num": "02",
+    "title": "패브릭 부스",
+    "subtitle": "공간에 맞춘 모듈형 설계",
+    "desc": "모듈형 구성으로 공간에 맞춰 유연하게 설계합니다. 렌탈/제작 선택 · 설치·철거 옵션 지원. LED 조명 연동 패브릭 시스템으로 브랜드를 돋보이게 합니다.",
+    "btn": "서비스 안내",
+    "to": "/services",
+    "img": "https://emsystem.co.kr/images/fabric-booth.jpg"
+  },
+  {
+    "num": "03",
+    "title": "간판 · 인포데스크",
+    "subtitle": "운영 동선에 맞춘 구성",
+    "desc": "부스 구조와 운영 동선에 맞춰 구성합니다. 그래픽 적용 지원 · 빠른 설치로 현장 세팅. 행사장 규모와 동선에 최적화된 배치를 제안합니다.",
+    "btn": "시공사례 보기",
+    "to": "/works",
+    "img": "https://emsystem.co.kr/images/infor.png"
+  },
+  {
+    "num": "04",
+    "title": "사인물",
+    "subtitle": "브랜드 노출을 극대화하는 사인",
+    "desc": "안내·유도·브랜드 노출 목적에 맞춘 사인 구성을 제공합니다. 출력물·스탠드·배너 제작·설치 지원. 현장 환경에 맞는 최적의 사인 솔루션을 제공합니다.",
+    "btn": "서비스 안내",
+    "to": "/services",
+    "img": "https://emsystem.co.kr/images/sign.png"
+  },
+  {
+    "num": "05",
+    "title": "COEX · KINTEX",
+    "subtitle": "국내 주요 전시장 시공 경험",
+    "desc": "코엑스, 킨텍스, 세텍, 송도컨벤시아, 수원메쎄 등 국내 주요 전시장에서의 풍부한 시공 경험을 보유하고 있습니다.",
+    "btn": "시공사례 전체 보기",
+    "to": "/works",
+    "img": "https://emsystem.co.kr/images/2.jpg"
+  },
+  {
+    "num": "06",
+    "title": "원스톱 서비스",
+    "subtitle": "시안부터 철거까지",
+    "desc": "시안 지원 → 제작/렌탈 → 운송 → 설치 → 현장 대응 → 철거까지 모든 과정을 EMSYSTEM 하나로 해결합니다.",
+    "btn": "견적 문의하기",
+    "to": "/contact",
+    "img": "https://emsystem.co.kr/images/3.jpg"
+  },
+  {
+    "num": "07",
+    "title": "시공 사례",
+    "subtitle": "다양한 전시 환경에서의 실적",
+    "desc": "수백 건의 전시 시공 경험으로 쌓인 노하우. 소규모 부스부터 대형 전시관까지 어떤 규모와 환경에서도 완벽한 시공을 보장합니다.",
+    "btn": "사례 전체 보기",
+    "to": "/works",
+    "img": "https://emsystem.co.kr/images/4.jpg"
+  },
+  {
+    "num": "08",
+    "title": "견적 문의",
+    "subtitle": "빠른 응답, 정확한 견적",
+    "desc": "행사 일정, 장소, 규모를 알려주시면 신속하게 맞춤 견적을 드립니다. 전화·이메일·카카오톡 상담 가능. 평일 09:00~18:00 운영.",
+    "btn": "지금 문의하기",
+    "to": "/contact",
+    "img": "https://emsystem.co.kr/images/5.jpg"
+  }
+]

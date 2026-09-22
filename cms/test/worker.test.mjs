@@ -59,3 +59,20 @@ test('D1 media storage roundtrips binary uploads and validates more than 50 phot
   data.works[0].images=photos.slice(0,30);data.works[1].images=photos.slice(30);
   assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision:2,content:data})})).status,200);
 });
+
+test('service edits remain draft until publication, validate images, and survive older admin saves',async()=>{
+  const s=setup(),headers=await s.login();const before=await (await s.request('/api/public/content')).json();assert.equal(before.services.length,8);
+  const state=await (await s.request('/api/admin/content',{headers})).json();const data=structuredClone(state.content);
+  const bytes=new Uint8Array(100);bytes.set([255,216,255]);const {src}=await (await s.request('/api/admin/upload',{method:'POST',headers,body:bytes})).json();
+  data.services[0]={...data.services[0],title:'새 소개',subtitle:'보조 문구',desc:'설명 수정',btn:'자세히 보기',img:src};
+  const save=await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision:state.revision,content:data})});assert.equal(save.status,200);
+  assert.deepEqual((await (await s.request('/api/public/content')).json()).services,before.services);
+  let rev=(await save.json()).revision;
+  const invalid=structuredClone(data);invalid.services[0].img='/media/00000000-0000-0000-0000-000000000000.jpg';assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision:rev,content:invalid})})).status,400);
+  invalid.services.pop();assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision:rev,content:invalid})})).status,400);
+  const pub=await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision:rev,content:data})});assert.equal(pub.status,200);rev=(await pub.json()).revision;
+  const after=await (await s.request('/api/public/content')).json();assert.deepEqual(after.services,data.services);assert.deepEqual(after.works,before.works);assert.deepEqual(after.hero,before.hero);
+  const old=structuredClone(data);delete old.services;
+  assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision:rev,content:old})})).status,200);
+  assert.deepEqual((await (await s.request('/api/public/content')).json()).services,data.services);
+});

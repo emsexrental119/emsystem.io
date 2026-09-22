@@ -30,7 +30,7 @@ $('#login-form').onsubmit=async event=>{
   }catch(e){$('#login-error').textContent=e.message;}});
 };
 $('#logout').onclick=()=>run(async()=>{if(dirty&&!confirm('저장하지 않은 변경사항이 있습니다. 로그아웃할까요?'))return;await api('/api/logout',{method:'POST'});csrf=null;content=null;dirty=false;showLogin();});
-function render() { renderWorks();$('#hero-title').value=content.hero.title;$('#hero-description').value=content.hero.description;renderHero(); }
+function render() { renderWorks();$('#hero-title').value=content.hero.title;$('#hero-description').value=content.hero.description;renderHero();renderServices(); }
 function renderWorks() {
   $('#work-count').textContent=content.works.length;const list=$('#work-list');list.replaceChildren();
   if(!content.works.length)list.append(el('div','첫 번째 시공사례를 추가해 보세요.','empty'));
@@ -48,7 +48,23 @@ function renderWorks() {
   });
 }
 function moveWork(from,to) { if(to<0||to>=content.works.length||from===to)return;const [w]=content.works.splice(from,1);content.works.splice(to,0,w);change();renderWorks(); }
-function setTab(tab) {activeTab=tab;for(const name of ['works','hero']){$(`#${name}-panel`).hidden=name!==tab;$(`#tab-${name}`).classList.toggle('active',name===tab);$(`#tab-${name}`).setAttribute('aria-pressed',String(name===tab));}}
+function setTab(tab) {activeTab=tab;for(const name of ['works','hero','services']){$(`#${name}-panel`).hidden=name!==tab;$(`#tab-${name}`).classList.toggle('active',name===tab);$(`#tab-${name}`).setAttribute('aria-pressed',String(name===tab));}}
+$('#tab-services').onclick=()=>setTab('services');
+function renderServices() {
+  const list=$('#service-list');list.replaceChildren();
+  content.services.forEach((s,i)=>{
+    const card=el('article',undefined,'panel service-editor');card.append(el('h3',`${s.num} · ${s.title}`));
+    const grid=el('div',undefined,'hero-grid'),fields=el('div');
+    for(const [key,label,max,rows] of [['title','제목',120,0],['subtitle','보조 제목',200,0],['desc','설명',1500,5],['btn','버튼 문구',80,0]]){
+      const wrap=el('label',label),input=el(rows?'textarea':'input');input.id=`service-${i}-${key}`;input.maxLength=max;if(rows)input.rows=rows;input.value=s[key];
+      input.oninput=()=>{s[key]=input.value;change();};wrap.append(input);fields.append(wrap);
+    }
+    const media=el('div'),img=photo(s.img,`${s.num}번 소개 이미지`);img.className='service-photo';media.append(img);
+    const label=el('label','사진 교체','button'),input=el('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.hidden=true;input.setAttribute('aria-label',`${s.num}번 소개 사진 교체`);
+    input.onchange=()=>{const file=input.files[0];input.value='';if(file)run(async()=>{const src=await upload(file);s.img=src;img.src=src;change();toast(`${s.num}번 사진을 교체했습니다. 사이트에 적용하면 공개됩니다.`);});};
+    label.append(input);media.append(label,el('p','사진과 문구 수정 후 아래 ‘사이트에 적용’을 눌러주세요.','muted'));grid.append(fields,media);card.append(grid);list.append(card);
+  });
+}
 $('#tab-works').onclick=()=>setTab('works');$('#tab-hero').onclick=()=>setTab('hero');
 $('#hero-title').oninput=e=>{content.hero.title=e.target.value;change();};$('#hero-description').oninput=e=>{content.hero.description=e.target.value;change();};
 function imageGrid(target,images,onChange) {
@@ -104,6 +120,8 @@ $('#preview').onclick=()=>{
   const target=$('#preview-body');target.replaceChildren();
   if(activeTab==='hero'){
     const hero=el('div',undefined,'hero-preview');if(content.hero.images.length)hero.append(photo(content.hero.images[0].src,''));hero.append(el('h2',content.hero.title),el('p',content.hero.description));target.append(hero);if(content.hero.images.length)target.append(previewCarousel(content.hero.images,hero));
+  }else if(activeTab==='services'){
+    for(const s of content.services){const card=el('article',undefined,'preview-work');card.append(el('h3',`${s.num} · ${s.title}`),el('p',s.subtitle),el('p',s.desc),photo(s.img,s.title),el('p',s.btn));target.append(card);}
   }else{
     const works=content.works.filter(w=>w.visible);if(!works.length)target.append(el('p','공개할 시공사례가 없습니다.','empty'));
     for(const w of works){const card=el('article',undefined,'preview-work');card.append(el('h3',`${w.venue} · ${w.title}`),photo(w.images[0].src,w.title));target.append(card,previewCarousel(w.images,card));}

@@ -21,6 +21,7 @@ replace('},[reduced]);return c.jsx("div",{ref:backgroundRef','},[reduced,images.
 replace('children:[1,2,3].map((n,i)=>c.jsx("img",{src:"/images/hero/exhibition-"+n+".jpg"','children:images.map((n,i)=>c.jsx("img",{src:n');
 replace('opacity:index===i?1:0','opacity:index%images.length===i?1:0');
 replace('function Mh(){','function Mh(){const cms=useCMSContent();');
+replace('children:Lh.map((a,s)=>','children:(cms&&Array.isArray(cms.services)&&cms.services.length===8?cms.services.map(a=>({...a,img:cmsImage(a.img)})):Lh).map((a,s)=>');
 const title='[{text:"전시의",color:"#f0ede8",delay:"0ms"},{text:"완성도를",color:"#c8a96e",delay:"100ms"},{text:"높이다",color:"#f0ede8",delay:"200ms"}]';
 replace(title,'(cms?cms.hero.title.split("\\n").map((text,i)=>({text,color:i===1?"#c8a96e":"#f0ede8",delay:i*100+"ms"})):'+title+')');
 replace('},s)),c.jsxs("div",{className:On("flex gap-4 justify-center mt-12','},s)),cms&&cms.hero.description?c.jsx("p",{style:{whiteSpace:"pre-line",lineHeight:1.8,maxWidth:600,margin:"24px auto 0",color:"#f0ede8",fontSize:15},children:cms.hero.description}):null,c.jsxs("div",{className:On("flex gap-4 justify-center mt-12');
