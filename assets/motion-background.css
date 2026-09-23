@@ -21,7 +21,7 @@
 /* Keep content surfaces readable while exposing the continuous background. */
 .wrapper > .stack-section,
 .wrapper > section[style*='background: rgb(13, 13, 13)'],
-#root > div:has(> nav):not(:has(.wrapper)) > section,
+#root > div:has(> nav):not(:has(.wrapper)) > section[style*='background: rgb(13, 13, 13)'],
 #root > div:has(> nav):not(:has(.wrapper)) > footer { background-color: transparent !important; }
 .ticker-wrap { background: #111111b8; }
 .card-inner { background: #111318c9; }
