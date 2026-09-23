@@ -76,3 +76,16 @@ test('service edits remain draft until publication, validate images, and survive
   assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision:rev,content:old})})).status,200);
   assert.deepEqual((await (await s.request('/api/public/content')).json()).services,data.services);
 });
+
+test('service page drafts, publishing, uploaded images and legacy saves preserve other content',async()=>{
+ const s=setup(),headers=await s.login();const before=await (await s.request('/api/public/content')).json();assert.equal(before.servicePage.items.length,3);assert.equal(before.servicePage.steps.length,6);
+ const state=await (await s.request('/api/admin/content',{headers})).json(),data=structuredClone(state.content);
+ const bytes=new Uint8Array(100);bytes.set([255,216,255]);const {src}=await (await s.request('/api/admin/upload',{method:'POST',headers,body:bytes})).json();
+ data.servicePage.title='변경 서비스';data.servicePage.items[0].img=src;data.servicePage.items[0].features=['새 특징'];data.servicePage.steps[0].desc='과정 수정';data.servicePage.ctaButton='상담하기';
+ const draft=await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision:state.revision,content:data})});assert.equal(draft.status,200);let revision=(await draft.json()).revision;assert.deepEqual(await (await s.request('/api/public/content')).json(),before);
+ const invalid=structuredClone(data);invalid.servicePage.items[0].img='/media/00000000-0000-0000-0000-000000000000.jpg';assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:invalid})})).status,400);
+ invalid.servicePage.items[0].img=src;invalid.servicePage.items[0].features=Array(13).fill('많음');assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:invalid})})).status,400);
+ const published=await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:data})});assert.equal(published.status,200);revision=(await published.json()).revision;
+ const after=await (await s.request('/api/public/content')).json();assert.deepEqual(after.servicePage,data.servicePage);assert.deepEqual(after.services,before.services);assert.deepEqual(after.works,before.works);assert.deepEqual(after.hero,before.hero);
+ delete data.servicePage;assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:data})})).status,200);assert.deepEqual((await (await s.request('/api/public/content')).json()).servicePage,after.servicePage);
+});

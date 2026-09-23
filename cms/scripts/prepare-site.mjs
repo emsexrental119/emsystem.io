@@ -27,6 +27,20 @@ replace(title,'(cms?cms.hero.title.split("\\n").map((text,i)=>({text,color:i===1
 replace('},s)),c.jsxs("div",{className:On("flex gap-4 justify-center mt-12','},s)),cms&&cms.hero.description?c.jsx("p",{style:{whiteSpace:"pre-line",lineHeight:1.8,maxWidth:600,margin:"24px auto 0",color:"#f0ede8",fontSize:15},children:cms.hero.description}):null,c.jsxs("div",{className:On("flex gap-4 justify-center mt-12');
 replace('function Bh(){return','function Bh(){const cms=useCMSContent(),groups=cms?cms.works.map(w=>({slug:w.id,expo:w.title,venue:w.venue,date:w.date,items:w.images.map((p,i)=>({id:w.id+"-"+i,img:cmsImage(p.src),title:p.alt||w.title}))})):Gh;return');
 replace('children:Gh.map(g=>','children:groups.map(g=>');
+const pageStart=source.indexOf('function Oh(){'),pageEnd=source.indexOf('const Fh=',pageStart);
+if(pageStart<0||pageEnd<0)throw Error('Service page anchors missing');
+let page=source.slice(pageStart,pageEnd);
+const pageDefaults=JSON.parse(fs.readFileSync(path.join(root,'cms/service-page-defaults.json'),'utf8'));
+function pageReplace(before,after){if(!page.includes(before))throw Error('Service page anchor missing: '+before);page=page.replace(before,after);}
+pageReplace('function Oh(){return','function Oh(){const cms=useCMSContent(),p=cms&&cms.servicePage?cms.servicePage:'+JSON.stringify(pageDefaults)+';return');
+for(const [key,value] of Object.entries(pageDefaults)){
+  if(typeof value==='string')pageReplace('children:'+JSON.stringify(value),'children:p.'+key);
+}
+pageReplace('Ih.map((e,t)=>','p.items.map((e,t)=>');
+pageReplace('Dh.map((e,t)=>','p.steps.map((e,t)=>');
+pageReplace('src:e.img','src:cmsImage(e.img)');
+pageReplace('children:["견적 문의하기 ",','children:[e.btn," ",');
+source=source.slice(0,pageStart)+page+source.slice(pageEnd);
 fs.writeFileSync(path.join(root,'assets/index-cms-20260921.js'),source);
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/assets\/index-(?:odc|cms)-20260921\.js/,'assets/index-cms-20260921.js');fs.writeFileSync(path.join(root,'index.html'),html);
 fs.mkdirSync(path.join(root,'admin'),{recursive:true});

@@ -1,7 +1,8 @@
 import seed from './seed.json' with { type: 'json' };
 import serviceDefaults from './services-defaults.json' with { type: 'json' };
+import servicePageDefaults from './service-page-defaults.json' with { type: 'json' };
 
-const withServices = data => ({...data, services:data.services ?? structuredClone(serviceDefaults)});
+const withServices = data => ({...data, services:data.services ?? structuredClone(serviceDefaults), servicePage:data.servicePage ?? structuredClone(servicePageDefaults)});
 
 const encoder = new TextEncoder();
 const cookieName = '__Host-ems-admin';
@@ -100,7 +101,12 @@ export function validateContent(data) {
   const entries = data.services ?? serviceDefaults;
   if (!Array.isArray(entries) || entries.length !== 8) fail('메인 소개는 8개 항목으로 구성됩니다.');
   const services = entries.map((s,i) => ({num:serviceDefaults[i].num, title:field(s.title,120,true), subtitle:field(s.subtitle,200), desc:field(s.desc,1500), btn:field(s.btn,80,true), to:serviceDefaults[i].to, img:validImage(s.img)}));
-  return {works, services, hero:{title:field(data.hero.title,120,true), description:field(data.hero.description,500), images:data.hero.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))}};
+  const p=data.servicePage ?? servicePageDefaults;
+  if(!Array.isArray(p.items)||p.items.length!==3||!Array.isArray(p.steps)||p.steps.length!==6)fail('서비스 3개와 진행 과정 6개를 확인해 주세요.');
+  const servicePage={label:field(p.label,80),title:field(p.title,120,true),intro:field(p.intro,1500),processLabel:field(p.processLabel,80),processTitle:field(p.processTitle,120,true),ctaTitle:field(p.ctaTitle,120,true),ctaDesc:field(p.ctaDesc,500),ctaButton:field(p.ctaButton,80,true),
+    items:p.items.map((s,i)=>{if(!Array.isArray(s.features)||s.features.length>12)fail('서비스 특징은 최대 12개까지 입력할 수 있습니다.');return {num:servicePageDefaults.items[i].num,title:field(s.title,120,true),subtitle:field(s.subtitle,200),desc:field(s.desc,1500),features:s.features.map(f=>field(f,200,true)),img:validImage(s.img),btn:field(s.btn,80,true)};}),
+    steps:p.steps.map((s,i)=>({step:servicePageDefaults.steps[i].step,title:field(s.title,120,true),desc:field(s.desc,500)}))};
+  return {works, services, servicePage, hero:{title:field(data.hero.title,120,true), description:field(data.hero.description,500), images:data.hero.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))}};
 }
 async function ensureContent(env) {
   const text = JSON.stringify(seed); const now = Date.now();
@@ -159,14 +165,16 @@ async function route(request, env) {
     if ((path === '/api/admin/content' && method === 'PUT') || (path === '/api/admin/publish' && method === 'POST')) {
       const data = await readJSON(request);
       // Older open admin tabs must preserve the newly editable section when saving.
-      if (data.content && data.content.services === undefined) {
+      if (data.content && (data.content.services === undefined || data.content.servicePage === undefined)) {
         const previous = await env.DB.prepare('SELECT draft_json FROM content WHERE id=1').first();
-        data.content.services = withServices(previous ? JSON.parse(previous.draft_json) : seed).services;
+        const old=withServices(previous ? JSON.parse(previous.draft_json) : seed);
+        if(data.content.services===undefined)data.content.services=old.services;
+        if(data.content.servicePage===undefined)data.content.servicePage=old.servicePage;
       }
       const content = validateContent(data.content);
       if (!Number.isSafeInteger(data.revision)) fail('새로고침 후 다시 시도해 주세요.');
       // Verify uploaded media before saving, so failed uploads can never enter a published record.
-      const media = [...new Set([...content.hero.images,...content.works.flatMap(w => w.images),...content.services.map(s=>({src:s.img}))].map(i=>i.src).filter(s=>s.startsWith('/media/')))];
+      const media = [...new Set([...content.hero.images,...content.works.flatMap(w => w.images),...content.services.map(s=>({src:s.img})),...content.servicePage.items.map(s=>({src:s.img}))].map(i=>i.src).filter(s=>s.startsWith('/media/')))];
       if (env.IMAGES) {
         for (const src of media) if (!await images(env).head(src.slice(7))) fail('업로드가 완료되지 않은 사진이 있습니다.');
       } else if (media.length) {

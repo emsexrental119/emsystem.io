@@ -30,7 +30,7 @@ $('#login-form').onsubmit=async event=>{
   }catch(e){$('#login-error').textContent=e.message;}});
 };
 $('#logout').onclick=()=>run(async()=>{if(dirty&&!confirm('저장하지 않은 변경사항이 있습니다. 로그아웃할까요?'))return;await api('/api/logout',{method:'POST'});csrf=null;content=null;dirty=false;showLogin();});
-function render() { renderWorks();$('#hero-title').value=content.hero.title;$('#hero-description').value=content.hero.description;renderHero();renderServices(); }
+function render() { renderWorks();$('#hero-title').value=content.hero.title;$('#hero-description').value=content.hero.description;renderHero();renderServices();renderServicePage(); }
 function renderWorks() {
   $('#work-count').textContent=content.works.length;const list=$('#work-list');list.replaceChildren();
   if(!content.works.length)list.append(el('div','첫 번째 시공사례를 추가해 보세요.','empty'));
@@ -48,7 +48,22 @@ function renderWorks() {
   });
 }
 function moveWork(from,to) { if(to<0||to>=content.works.length||from===to)return;const [w]=content.works.splice(from,1);content.works.splice(to,0,w);change();renderWorks(); }
-function setTab(tab) {activeTab=tab;for(const name of ['works','hero','services']){$(`#${name}-panel`).hidden=name!==tab;$(`#tab-${name}`).classList.toggle('active',name===tab);$(`#tab-${name}`).setAttribute('aria-pressed',String(name===tab));}}
+function setTab(tab) {activeTab=tab;for(const name of ['works','hero','services','service-page']){$(`#${name}-panel`).hidden=name!==tab;$(`#tab-${name}`).classList.toggle('active',name===tab);$(`#tab-${name}`).setAttribute('aria-pressed',String(name===tab));}}
+$('#tab-service-page').onclick=()=>setTab('service-page');
+function renderServicePage(){
+  const p=content.servicePage,list=$('#service-page-list');list.replaceChildren();
+  const fields=(target,obj,spec,prefix)=>{for(const [key,label,max,rows] of spec){const wrap=el('label',label),input=el(rows?'textarea':'input');input.id=`${prefix}-${key}`;input.maxLength=max;if(rows)input.rows=rows;input.value=Array.isArray(obj[key])?obj[key].join('\n'):obj[key];input.oninput=()=>{obj[key]=key==='features'?input.value.split('\n').map(s=>s.trim()).filter(Boolean):input.value;change();};wrap.append(input);target.append(wrap);}};
+  const panel=title=>{const n=el('article',undefined,'panel service-editor');n.append(el('h3',title));list.append(n);return n;};
+  fields(panel('페이지 상단'),p,[['label','영문 표기',80,0],['title','페이지 제목',120,0],['intro','소개 문구',1500,4]],'service-page');
+  for(const [i,s] of p.items.entries()){
+    const card=panel(`${s.num} · ${s.title}`),grid=el('div',undefined,'hero-grid'),left=el('div'),right=el('div');
+    fields(left,s,[['title','서비스명',120,0],['subtitle','보조 제목',200,0],['desc','설명',1500,4],['features','특징 목록 — 한 줄에 하나씩, 최대 12개',2411,6],['btn','버튼 문구',80,0]],`service-page-item-${i}`);
+    const img=photo(s.img,s.title);img.className='service-photo';right.append(img);const label=el('label','사진 교체','button'),input=el('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.hidden=true;input.setAttribute('aria-label',`${s.num}번 서비스 사진 교체`);input.onchange=()=>{const f=input.files[0];input.value='';if(f)run(async()=>{s.img=await upload(f);img.src=s.img;change();toast('사진을 교체했습니다. 사이트에 적용하면 공개됩니다.');});};label.append(input);right.append(label);grid.append(left,right);card.append(grid);
+  }
+  const process=panel('진행 과정');fields(process,p,[['processLabel','영문 표기',80,0],['processTitle','영역 제목',120,0]],'service-process');
+  const steps=el('div',undefined,'fields');p.steps.forEach((s,i)=>{const n=el('div');n.append(el('h3',s.step+'단계'));fields(n,s,[['title','단계명',120,0],['desc','단계 설명',500,3]],`service-step-${i}`);steps.append(n);});process.append(steps);
+  fields(panel('하단 문의 안내'),p,[['ctaTitle','제목',120,0],['ctaDesc','설명',500,3],['ctaButton','버튼 문구',80,0]],'service-cta');
+}
 $('#tab-services').onclick=()=>setTab('services');
 function renderServices() {
   const list=$('#service-list');list.replaceChildren();
@@ -120,6 +135,10 @@ $('#preview').onclick=()=>{
   const target=$('#preview-body');target.replaceChildren();
   if(activeTab==='hero'){
     const hero=el('div',undefined,'hero-preview');if(content.hero.images.length)hero.append(photo(content.hero.images[0].src,''));hero.append(el('h2',content.hero.title),el('p',content.hero.description));target.append(hero);if(content.hero.images.length)target.append(previewCarousel(content.hero.images,hero));
+  }else if(activeTab==='service-page'){
+    const p=content.servicePage;target.append(el('p',p.label),el('h2',p.title),el('p',p.intro));
+    for(const s of p.items){const card=el('article',undefined,'preview-work');card.append(el('h3',`${s.num} · ${s.title}`),el('p',s.subtitle),el('p',s.desc),photo(s.img,s.title));const ul=el('ul');s.features.forEach(f=>ul.append(el('li',f)));card.append(ul,el('p',s.btn));target.append(card);}
+    target.append(el('p',p.processLabel),el('h2',p.processTitle));for(const s of p.steps)target.append(el('h3',`${s.step} · ${s.title}`),el('p',s.desc));target.append(el('h2',p.ctaTitle),el('p',p.ctaDesc),el('p',p.ctaButton));
   }else if(activeTab==='services'){
     for(const s of content.services){const card=el('article',undefined,'preview-work');card.append(el('h3',`${s.num} · ${s.title}`),el('p',s.subtitle),el('p',s.desc),photo(s.img,s.title),el('p',s.btn));target.append(card);}
   }else{
