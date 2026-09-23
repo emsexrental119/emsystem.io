@@ -1,0 +1,44 @@
+/* Decorative, silent motion behind page titles; no media download required. */
+section:has(h1) { position: relative; isolation: isolate; overflow: hidden; }
+section:has(h1):not(:has(.hero-img)) { background: #0d1016; }
+section:has(h1):not(:has(.hero-img)) > div { position: relative; z-index: 2; }
+section:has(h1):not(:has(.hero-img)) p { color: #c3c4c9 !important; }
+section:has(h1)::before {
+  content: ""; position: absolute; z-index: 1; pointer-events: none;
+  inset: -35%; opacity: .85;
+  background:
+    radial-gradient(ellipse at 72% 45%, #e6b76036 0%, transparent 38%),
+    radial-gradient(ellipse at 30% 80%, #617b9630 0%, transparent 34%),
+    linear-gradient(115deg, transparent 38%, #f4d49a05 42%, #f4d49a23 43%, transparent 44%, transparent 55%, #f4d49a13 56%, transparent 57%);
+  animation: em-light-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+section:has(h1):not(:has(.hero-img))::after {
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  width: max(720px,80vw); height: max(720px,80vw); right: -22%; top: -100%;
+  border: 1px solid #e9ca8e45; border-radius: 43% 57% 61% 39%;
+  box-shadow: 0 0 32px #c8a96e10,inset 0 0 40px #c8a96e0a,
+    0 0 0 32px #e9ca8e0b,0 0 0 65px #e9ca8e0a,0 0 0 100px #e9ca8e09,0 0 0 138px #e9ca8e08;
+  background: radial-gradient(ellipse at 45% 50%,transparent 45%,#d9b5730a 70%,transparent 72%);
+  animation: em-orbit 35s linear infinite;
+  will-change: transform;
+}
+section:has(> .hero-img)::before { opacity: .55; mix-blend-mode: screen; }
+section:has(> .hero-img) > a.absolute,
+section:has(> .hero-img) > .absolute.bottom-10 { z-index: 2; }
+@keyframes em-light-drift {
+  from { transform: translate3d(-6%,-3%,0) rotate(-6deg) scale(1); }
+  to { transform: translate3d(7%,4%,0) rotate(8deg) scale(1.08); }
+}
+@keyframes em-orbit {
+  from { transform: rotate(-20deg) scaleY(.75); }
+  to { transform: rotate(340deg) scaleY(.75); }
+}
+@media (max-width:767px) {
+  section:has(h1):not(:has(.hero-img)) { padding-left: 24px !important; padding-right: 24px !important; }
+  section:has(h1):not(:has(.hero-img))::after { right: -145%; top: -65%; opacity: .65; }
+  section:has(h1)::before { opacity: .65; }
+}
+@media (prefers-reduced-motion:reduce) {
+  section:has(h1)::before,section:has(h1)::after { animation: none !important; will-change: auto; }
+}
