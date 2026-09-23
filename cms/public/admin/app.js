@@ -98,13 +98,13 @@ function renderHero(){ $('#hero-count').textContent=content.hero.images.length+'
 function renderWorkImages(){imageGrid('#work-images',editing.images,renderWorkImages);}
 function openWork(work) {
   editing=work?structuredClone(work):{id:crypto.randomUUID(),title:'',venue:'',date:'',visible:true,images:[]};
-  $('#work-dialog-title').textContent=work?'시공사례 수정':'시공사례 추가';$('#work-title').value=editing.title;$('#work-venue').value=editing.venue;$('#work-date').value=editing.date;$('#work-visible').checked=editing.visible;renderWorkImages();$('#work-dialog').showModal();
+  $('#work-dialog-title').textContent=work?'시공사례 수정':'시공사례 추가';$('#work-title').value=editing.title;$('#work-venue').value=editing.venue;$('#work-date').value=editing.date;$('#work-description').value=editing.description||'';$('#work-visible').checked=editing.visible;renderWorkImages();$('#work-dialog').showModal();
 }
 $('#add-work').onclick=()=>openWork();
 function closeWork(){if(!busy){$('#work-dialog').close();editing=null;}}
 $('#close-work').onclick=closeWork;$('#cancel-work').onclick=closeWork;
 $('#work-dialog').addEventListener('cancel',e=>{if(busy)e.preventDefault();});
-$('#work-form').onsubmit=event=>{event.preventDefault();if(busy)return;if(!editing.images.length)return alert('사진을 한 장 이상 추가해 주세요.');Object.assign(editing,{title:$('#work-title').value.trim(),venue:$('#work-venue').value.trim(),date:$('#work-date').value.trim(),visible:$('#work-visible').checked});if(!editing.title||!editing.venue)return;const i=content.works.findIndex(w=>w.id===editing.id);if(i<0)content.works.push(editing);else content.works[i]=editing;change();renderWorks();closeWork();};
+$('#work-form').onsubmit=event=>{event.preventDefault();if(busy)return;if(!editing.images.length)return alert('사진을 한 장 이상 추가해 주세요.');Object.assign(editing,{title:$('#work-title').value.trim(),venue:$('#work-venue').value.trim(),date:$('#work-date').value.trim(),description:$('#work-description').value.trim(),visible:$('#work-visible').checked});if(!editing.title||!editing.venue)return;const i=content.works.findIndex(w=>w.id===editing.id);if(i<0)content.works.push(editing);else content.works[i]=editing;change();renderWorks();closeWork();};
 async function upload(file) {
   if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('JPG, PNG, WebP 사진을 선택해 주세요.');
   if(file.size>30*1024*1024)throw new Error('사진 한 장은 30MB 이하로 선택해 주세요.');

@@ -95,7 +95,8 @@ export function validateContent(data) {
     const id = field(w.id, 80, true);
     if (!/^[a-zA-Z0-9_-]+$/.test(id) || ids.has(id)) fail('시공사례 번호가 중복되었습니다.'); ids.add(id);
     if (!Array.isArray(w.images) || w.images.length < 1 || w.images.length > 50 || typeof w.visible !== 'boolean') fail('사례별 사진은 1~50장까지 등록할 수 있습니다.');
-    return {id, title:field(w.title, 120, true), venue:field(w.venue,120,true), date:field(w.date,80), visible:w.visible, images:w.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))};
+    const description=field(w.description ?? "",2000);
+    return {id, title:field(w.title, 120, true), venue:field(w.venue,120,true), date:field(w.date,80), ...(description?{description}:{}), visible:w.visible, images:w.images.map(i => ({src:validImage(i.src), alt:field(i.alt,200)}))};
   });
   if (data.hero.images.length < 1 || data.hero.images.length > 20) fail('메인 배경 사진은 1~20장까지 등록할 수 있습니다.');
   const entries = data.services ?? serviceDefaults;
@@ -165,11 +166,12 @@ async function route(request, env) {
     if ((path === '/api/admin/content' && method === 'PUT') || (path === '/api/admin/publish' && method === 'POST')) {
       const data = await readJSON(request);
       // Older open admin tabs must preserve the newly editable section when saving.
-      if (data.content && (data.content.services === undefined || data.content.servicePage === undefined)) {
+      if (data.content && (data.content.services === undefined || data.content.servicePage === undefined || data.content.works?.some(w=>w.description===undefined))) {
         const previous = await env.DB.prepare('SELECT draft_json FROM content WHERE id=1').first();
         const old=withServices(previous ? JSON.parse(previous.draft_json) : seed);
         if(data.content.services===undefined)data.content.services=old.services;
         if(data.content.servicePage===undefined)data.content.servicePage=old.servicePage;
+        if(Array.isArray(data.content.works))for(const w of data.content.works){if(w.description===undefined)w.description=old.works.find(p=>p.id===w.id)?.description||"";}
       }
       const content = validateContent(data.content);
       if (!Number.isSafeInteger(data.revision)) fail('새로고침 후 다시 시도해 주세요.');

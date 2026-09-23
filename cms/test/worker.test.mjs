@@ -89,3 +89,11 @@ test('service page drafts, publishing, uploaded images and legacy saves preserve
  const after=await (await s.request('/api/public/content')).json();assert.deepEqual(after.servicePage,data.servicePage);assert.deepEqual(after.services,before.services);assert.deepEqual(after.works,before.works);assert.deepEqual(after.hero,before.hero);
  delete data.servicePage;assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:data})})).status,200);assert.deepEqual((await (await s.request('/api/public/content')).json()).servicePage,after.servicePage);
 });
+
+test('case descriptions stay private until publish and survive older admin saves',async()=>{
+ const s=setup(),headers=await s.login();const state=await (await s.request('/api/admin/content',{headers})).json();const data=structuredClone(state.content);data.works[0].description='행사 공간 안내\n설치 현장 사진';
+ const save=await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision:state.revision,content:data})});assert.equal(save.status,200);let revision=(await save.json()).revision;assert.equal((await (await s.request('/api/public/content')).json()).works[0].description,undefined);
+ const pub=await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:data})});assert.equal(pub.status,200);revision=(await pub.json()).revision;assert.equal((await (await s.request('/api/public/content')).json()).works[0].description,data.works[0].description);
+ const legacy=structuredClone(data);delete legacy.works[0].description;const old=await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision,content:legacy})});assert.equal(old.status,200);revision=(await old.json()).revision;assert.equal((await (await s.request('/api/admin/content',{headers})).json()).content.works[0].description,data.works[0].description);
+ data.works[0].description='x'.repeat(2001);assert.equal((await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision,content:data})})).status,400);data.works[0].description='';assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:data})})).status,200);assert.equal((await (await s.request('/api/public/content')).json()).works[0].description,undefined);
+});

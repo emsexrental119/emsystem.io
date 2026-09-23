@@ -27,6 +27,10 @@ replace(title,'(cms?cms.hero.title.split("\\n").map((text,i)=>({text,color:i===1
 replace('},s)),c.jsxs("div",{className:On("flex gap-4 justify-center mt-12','},s)),cms&&cms.hero.description?c.jsx("p",{style:{whiteSpace:"pre-line",lineHeight:1.8,maxWidth:600,margin:"24px auto 0",color:"#f0ede8",fontSize:15},children:cms.hero.description}):null,c.jsxs("div",{className:On("flex gap-4 justify-center mt-12');
 replace('function Bh(){return','function Bh(){const cms=useCMSContent(),groups=cms?cms.works.map(w=>({slug:w.id,expo:w.title,venue:w.venue,date:w.date,items:w.images.map((p,i)=>({id:w.id+"-"+i,img:cmsImage(p.src),title:p.alt||w.title}))})):Gh;return');
 replace('children:Gh.map(g=>','children:groups.map(g=>');
+replace('children:g.expo}),g.date?', 'children:c.jsx("a",{href:"/works/"+g.slug+"/",style:{color:"inherit",textDecoration:"underline",textUnderlineOffset:6},children:g.expo+" · 상세보기 →"})}),g.date?');
+replace('function Bh(){', 'function WorkDetailRoute(){const id=decodeURIComponent(location.pathname.split("/")[2]||"");y.useEffect(()=>{import("/assets/work-detail.js").then(m=>m.refreshDetail(document.getElementById("work-detail-root"),id))},[id]);return c.jsxs("div",{className:"case-page",children:[c.jsx(vr,{}),c.jsx("main",{id:"work-detail-root",style:{paddingTop:100,minHeight:"70vh"}})]});}function Bh(){');
+replace('path:"/works",element:c.jsx(Bh,{})}),', 'path:"/works",element:c.jsx(Bh,{})}),c.jsx(Vt,{path:"/works/:id",element:c.jsx(WorkDetailRoute,{})}),');
+
 const pageStart=source.indexOf('function Oh(){'),pageEnd=source.indexOf('const Fh=',pageStart);
 if(pageStart<0||pageEnd<0)throw Error('Service page anchors missing');
 let page=source.slice(pageStart,pageEnd);
@@ -49,3 +53,5 @@ fs.writeFileSync(path.join(root,'admin/redirect.js'),origin?'location.replace('+
 console.log('CMS integration prepared. Connected:',Boolean(origin));
 
 await import('./prepare-seo.mjs');
+
+await import("./prepare-works.mjs");
