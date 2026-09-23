@@ -1,14 +1,13 @@
 name: Publish site with current portfolio
 on:
-  workflow_run:
-    workflows: ["pages build and deployment"]
-    types: [completed]
+  push:
     branches: [main]
   workflow_dispatch:
   schedule:
     - cron: '17,47 * * * *'
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -16,7 +15,6 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -34,6 +32,23 @@ jobs:
           cp index.html 404.html robots.txt sitemap.xml CNAME _site/
           cp -R assets images admin services works assembly contact _site/
           touch _site/.nojekyll
+      - name: Wait for the existing branch deployment
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            for (let attempt = 0; attempt < 60; attempt++) {
+              const {data} = await github.rest.actions.listWorkflowRunsForRepo({
+                ...context.repo, head_sha: context.sha, per_page: 20
+              });
+              const branchBuild = data.workflow_runs.find(run => run.path === 'dynamic/pages/pages-build-deployment');
+              if (branchBuild?.status === 'completed') {
+                if (branchBuild.conclusion !== 'success') throw new Error('Branch deployment failed');
+                return;
+              }
+              await new Promise(resolve => setTimeout(resolve, 10000));
+            }
+            throw new Error('Branch deployment did not finish');
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
