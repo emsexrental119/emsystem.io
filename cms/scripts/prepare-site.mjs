@@ -7,6 +7,7 @@ if(origin && (new URL(origin).protocol!=='https:' || new URL(origin).origin!==or
 let source=fs.readFileSync(path.join(root,'assets/index-odc-20260921.js'),'utf8');
 function replace(before,after){if(!source.includes(before))throw Error('Missing integration anchor: '+before.slice(0,80));source=source.replace(before,after);}
 replace('{label:"카카오 상담",href:"http://pf.kakao.com/_SxlTzX"}];return c.jsx("footer"','{label:"카카오 상담",href:"http://pf.kakao.com/_SxlTzX"},{label:"관리자 로그인",href:"/admin/"}];return c.jsx("footer"');
+replace('children:["전시부스 · 사인물 · 인포데스크",', 'children:["이엠시스템 · EM시스템",c.jsx("br",{}),"전시부스 · 사인물 · 인포데스크",');
 const helper=`
 const cmsOrigin=${JSON.stringify(origin)};
 let cmsContent=null;const cmsListeners=new Set();

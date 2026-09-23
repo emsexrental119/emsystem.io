@@ -6,6 +6,8 @@ const pages = JSON.parse(fs.readFileSync(path.join(root, 'cms/scripts/seo-pages.
 const escape = s => s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 let template = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 template = template.replace(/\s*<link rel="canonical"[^>]*>/g, '').replace(/\s*<script src="\/assets\/seo.js"[^>]*><\/script>/g, '');
+template = template.replace(/<script data-site-identity type="application\/ld\+json">[\s\S]*?<\/script>/g, '');
+const siteIdentity = {'@context':'https://schema.org','@type':'WebSite','@id':'https://emsystem.co.kr/#website',url:'https://emsystem.co.kr/',name:'이엠시스템',alternateName:['EM시스템','EMSYSTEM'],inLanguage:'ko-KR',publisher:{'@id':'https://emsystem.co.kr/#organization'}};
 for (const [route, title, description, heading] of pages) {
   const url = 'https://emsystem.co.kr/' + (route ? route + '/' : '');
   let html = template.replace(/<title>[^<]*<\/title>/, '<title>' + escape(title) + '</title>');
@@ -13,8 +15,9 @@ for (const [route, title, description, heading] of pages) {
     html = html.replace(new RegExp('(<meta (?:name|property)="'+key+'" content=")[^"]*(")'), '$1'+escape(value)+'$2');
   }
   html = html.replace('</head>', '    <link rel="canonical" href="'+url+'">\n    <script src="/assets/seo.js"></script>\n  </head>');
+  if(!route)html=html.replace('</head>','<script data-site-identity type="application/ld+json">'+JSON.stringify(siteIdentity)+'</script></head>');
   const nav = pages.map(([r,,,h]) => '<a href="/'+(r?r+'/':'')+'">'+escape(h)+'</a>').join(' · ');
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, '<div id="root"><main style="padding:2rem;font-family:sans-serif"><h1>'+escape(heading)+'</h1><p>'+escape(description)+'</p><nav>'+nav+'</nav><p>주식회사 이엠시스템 · 031-528-3119</p></main></div>');
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, '<div id="root"><main style="padding:2rem;font-family:sans-serif"><h1>'+escape(heading)+'</h1><p>'+escape(description)+'</p><nav>'+nav+'</nav><p>주식회사 이엠시스템 · EM시스템 · EMSYSTEM · 031-528-3119</p></main></div>');
   fs.mkdirSync(path.join(root,route),{recursive:true});
   fs.writeFileSync(path.join(root,route,'index.html'),html);
 }
