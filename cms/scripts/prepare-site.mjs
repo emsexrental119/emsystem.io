@@ -47,3 +47,5 @@ fs.mkdirSync(path.join(root,'admin'),{recursive:true});
 fs.writeFileSync(path.join(root,'admin/index.html'),'<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EMSYSTEM 관리자</title><body><p>관리자 화면으로 이동합니다.</p><script src="/admin/redirect.js"></script></body></html>');
 fs.writeFileSync(path.join(root,'admin/redirect.js'),origin?'location.replace('+JSON.stringify(origin+'/admin/')+');':'document.querySelector("p").textContent="관리자 서비스 연결을 준비 중입니다.";');
 console.log('CMS integration prepared. Connected:',Boolean(origin));
+
+await import('./prepare-seo.mjs');
