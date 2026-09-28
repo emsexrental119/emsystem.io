@@ -22,6 +22,10 @@ test('inventory is private; link grants read only and rotation revokes old link'
  assert.equal((await s.req('/api/admin/inventory')).status,401);
  let r=await s.req('/api/admin/inventory',{headers:s.headers});assert.equal(r.status,200);
  const initial=await r.json(),token=initial.shareUrl.split('#')[1];
+ assert.match(initial.shareUrl,/^https:\/\/site\.test\/s\/#[A-Za-z0-9_-]{22}$/);
+ const legacy=s.db.prepare('SELECT share_token FROM inventory WHERE id=1').get().share_token;
+ assert.equal((await s.req('/api/inventory',{headers:{Authorization:'Bearer '+legacy}})).status,200);
+ assert.equal((await s.req('/api/inventory',{headers:{Authorization:'Bearer '+token.slice(0,-1)}})).status,403);
  const viewer={Authorization:'Bearer '+token};
  r=await s.req('/api/inventory',{headers:viewer});assert.equal(r.status,200);
  assert.equal(r.headers.get('cache-control'),'no-store');
@@ -32,6 +36,7 @@ test('inventory is private; link grants read only and rotation revokes old link'
  const rotated=await (await s.req('/api/admin/inventory/link',{method:'POST',headers:s.headers,body:'{}'})).json();
  assert.notEqual(rotated.shareUrl,initial.shareUrl);
  assert.equal((await s.req('/api/inventory',{headers:viewer})).status,403);
+ assert.equal((await s.req('/api/inventory',{headers:{Authorization:'Bearer '+legacy}})).status,403);
  assert.equal((await s.req('/api/inventory',{headers:{Authorization:'Bearer '+rotated.shareUrl.split('#')[1]}})).status,200);
 });
 test('admin edits validate stock, preserve revisions, reject CSRF, and retain history',async()=>{

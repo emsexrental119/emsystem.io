@@ -1,3 +1,6 @@
+// Preserve existing links while offering a 128-bit, URL-safe compact alias.
+export const shortShareToken = token => btoa(String.fromCharCode(...token.slice(0,32).match(/../g).map(byte=>parseInt(byte,16)))).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
+
 export function validateItems(items) {
   const invalid = message => { throw Object.assign(new Error(message), {status:400}); };
   if (!Array.isArray(items) || items.length > 2000) invalid('품목은 최대 2,000개까지 저장할 수 있습니다.');
@@ -23,12 +26,12 @@ export async function inventoryRoute(request, env, helpers) {
   let row=await env.DB.prepare('SELECT * FROM inventory WHERE id=1').first();
   if (!admin) {
     const token=(request.headers.get('Authorization')||'').replace(/^Bearer /,'');
-    if (!row || !/^[a-f0-9]{64}$/.test(token) || !equal(token,row.share_token)) fail('공유 링크를 확인해 주세요. 링크가 변경되었을 수 있습니다.',403);
+    if (!row || !((/^[a-f0-9]{64}$/.test(token) && equal(token,row.share_token)) || (/^[A-Za-z0-9_-]{22}$/.test(token) && equal(token,shortShareToken(row.share_token))))) fail('공유 링크를 확인해 주세요. 링크가 변경되었을 수 있습니다.',403);
   }
   if (path==='/api/admin/inventory/link' && method==='POST') {
     const token=random();
     await env.DB.prepare('UPDATE inventory SET share_token=? WHERE id=1').bind(token).run();
-    return json({shareUrl:(env.SITE_ORIGIN || url.origin)+'/stock/#'+token});
+    return json({shareUrl:(env.SITE_ORIGIN || url.origin)+'/s/#'+shortShareToken(token)});
   }
   if (method==='PUT' && path==='/api/admin/inventory') {
     const data=await readJSON(request);
@@ -43,6 +46,6 @@ export async function inventoryRoute(request, env, helpers) {
     row={...row,items_json:text,revision:data.revision+1,updated_at:now};
   } else if (method!=='GET' || !['/api/inventory','/api/admin/inventory'].includes(path)) return json({error:'지원하지 않는 작업입니다.'},405);
   const result={items:JSON.parse(row.items_json),updatedAt:row.updated_at};
-  if(admin) Object.assign(result,{revision:row.revision,shareUrl:(env.SITE_ORIGIN || url.origin)+'/stock/#'+row.share_token});
+  if(admin) Object.assign(result,{revision:row.revision,shareUrl:(env.SITE_ORIGIN || url.origin)+'/s/#'+shortShareToken(row.share_token)});
   return json(result,200,{'X-Robots-Tag':'noindex, nofollow','Referrer-Policy':'no-referrer'});
 }
