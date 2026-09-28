@@ -12,7 +12,9 @@ export function validateItems(items) {
     const key = `${item.width}x${item.height}`;
     if (seen.has(key)) invalid('같은 사이즈가 중복되었습니다. 기존 품목의 수량을 수정해 주세요.');
     seen.add(key);
-    return {width:item.width,height:item.height,quantity:item.quantity,note:item.note.trim()};
+    const shipped=item.shipped ?? 0;
+    if (!Number.isSafeInteger(shipped) || shipped<0 || shipped>1000000) invalid('출고 수량은 0 이상 정수로 입력해 주세요.');
+    return {width:item.width,height:item.height,quantity:item.quantity,note:item.note.trim(),shipped};
   }).sort((a,b)=>a.width-b.width || a.height-b.height);
 }
 
@@ -35,8 +37,27 @@ export async function inventoryRoute(request, env, helpers) {
   }
   if (method==='PUT' && path==='/api/admin/inventory') {
     const data=await readJSON(request);
-    const items=validateItems(data.items);
     if (!Number.isSafeInteger(data.revision) || data.revision!==row.revision) fail('다른 화면에서 재고가 변경되었습니다. 새로고침 후 다시 수정해 주세요.',409);
+    const previous=JSON.parse(row.items_json).map(i=>({...i,shipped:i.shipped??0}));
+    let items;
+    if (data.shipment) {
+      const {width,height,total}=data.shipment;
+      if (!Number.isSafeInteger(total) || total<0 || total>1000000) fail('출고 수량은 0 이상 정수로 입력해 주세요.');
+      const item=previous.find(i=>i.width===width && i.height===height);
+      if (!item) fail('해당 사이즈를 찾을 수 없습니다.',404);
+      const difference=total-item.shipped;
+      if (difference>item.quantity) fail('현재 창고수량보다 많이 출고할 수 없습니다.');
+      item.quantity-=difference;
+      item.shipped=total;
+      items=validateItems(previous);
+    } else {
+      if (!Array.isArray(data.items)) fail('저장할 품목을 확인해 주세요.');
+      items=validateItems(data.items.map(i=>{
+        const old=previous.find(p=>p.width===i?.width && p.height===i?.height);
+        if(old && i.shipped!==undefined && i.shipped!==old.shipped) fail('출고 수량은 출고 칸에서 변경해 주세요.');
+        return i ? {...i,shipped:i.shipped??old?.shipped??0} : i;
+      }));
+    }
     const text=JSON.stringify(items), now=Date.now();
     const results=await env.DB.batch([
       env.DB.prepare('INSERT OR IGNORE INTO inventory_history (revision,items_json,actor,updated_at) SELECT revision,items_json,?,updated_at FROM inventory WHERE id=1 AND revision=?').bind(env.ADMIN_USERNAME,data.revision),
@@ -45,7 +66,7 @@ export async function inventoryRoute(request, env, helpers) {
     if (results[1].meta.changes!==1) fail('다른 화면에서 재고가 변경되었습니다. 새로고침 후 다시 수정해 주세요.',409);
     row={...row,items_json:text,revision:data.revision+1,updated_at:now};
   } else if (method!=='GET' || !['/api/inventory','/api/admin/inventory'].includes(path)) return json({error:'지원하지 않는 작업입니다.'},405);
-  const result={items:JSON.parse(row.items_json),updatedAt:row.updated_at};
+  const result={items:JSON.parse(row.items_json).map(i=>({...i,shipped:i.shipped??0})),updatedAt:row.updated_at};
   if(admin) Object.assign(result,{revision:row.revision,shareUrl:(env.SITE_ORIGIN || url.origin)+'/s/#'+shortShareToken(row.share_token)});
   return json(result,200,{'X-Robots-Tag':'noindex, nofollow','Referrer-Policy':'no-referrer'});
 }

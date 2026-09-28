@@ -61,3 +61,24 @@ test('admin edits validate stock, preserve revisions, reject CSRF, and retain hi
 test('sizes and quantities reject malformed data',()=>{
  for(const input of [null,[null],[{width:970,height:3000,quantity:'1',note:''}]])assert.throws(()=>validateItems(input));
 });
+
+test('shipment totals subtract only the difference, restore corrections, and reject excess or stale writes',async()=>{
+ const s=setup(),headers=s.headers;
+ let state=await (await s.req('/api/admin/inventory',{headers})).json();
+ state=await (await s.req('/api/admin/inventory',{method:'PUT',headers,body:JSON.stringify({revision:state.revision,items:[{width:970,height:3000,quantity:18,note:''}]})})).json();
+ assert.equal(state.items[0].shipped,0);
+ async function change(total,expected=200,revision=state.revision){
+ const r=await s.req('/api/admin/inventory',{method:'PUT',headers,body:JSON.stringify({revision,shipment:{width:970,height:3000,total}})});assert.equal(r.status,expected);if(expected===200)state=await r.json();
+ }
+ await change(3);assert.equal(state.items[0].quantity,15);assert.equal(state.items[0].shipped,3);
+ await change(5);assert.equal(state.items[0].quantity,13);
+ await change(5);assert.equal(state.items[0].quantity,13);
+ await change(2);assert.equal(state.items[0].quantity,16);
+ await change(19,400);await change(-1,400);await change(1.5,400);await change(3,409,state.revision-1);
+ const legacy=state.items.map(({shipped,...i})=>({...i,note:'수정'}));
+ state=await (await s.req('/api/admin/inventory',{method:'PUT',headers,body:JSON.stringify({revision:state.revision,items:legacy})})).json();
+ assert.equal(state.items[0].shipped,2);assert.equal(state.items[0].quantity,16);
+ const token=state.shareUrl.split('#')[1],viewer=await(await s.req('/api/inventory',{headers:{Authorization:'Bearer '+token}})).json();
+ assert.equal(viewer.items[0].shipped,2);assert.equal(viewer.items[0].quantity,16);
+ assert.equal((await s.req('/api/admin/inventory',{method:'PUT',headers:{Authorization:'Bearer '+token},body:JSON.stringify({revision:state.revision,shipment:{width:970,height:3000,total:3}})})).status,401);
+});
