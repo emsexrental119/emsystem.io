@@ -30,7 +30,7 @@ jobs:
           node cms/scripts/prepare-works.mjs
           mkdir _site
           cp index.html 404.html robots.txt sitemap.xml CNAME _site/
-          cp -R assets images admin services works assembly contact _site/
+          cp -R assets images admin stock services works assembly contact _site/
           touch _site/.nojekyll
       - name: Wait for the existing branch deployment
         if: github.event_name == 'push'

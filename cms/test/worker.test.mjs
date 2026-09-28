@@ -7,7 +7,7 @@ import worker from '../worker.mjs';
 import seed from '../seed.json' with {type:'json'};
 
 function setup() {
-  const db=new DatabaseSync(':memory:');for(const name of ['0001_content.sql','0002_media.sql'])db.exec(readFileSync(new URL('../migrations/'+name,import.meta.url),'utf8'));
+  const db=new DatabaseSync(':memory:');for(const name of ['0001_content.sql','0002_media.sql','0003_inventory.sql'])db.exec(readFileSync(new URL('../migrations/'+name,import.meta.url),'utf8'));
   const stmt=(sql,params=[])=>({bind:(...values)=>stmt(sql,values.map(v=>v instanceof ArrayBuffer?new Uint8Array(v):v)),first:async()=>db.prepare(sql).get(...params)||null,run:async()=>({meta:db.prepare(sql).run(...params)})});
   const password=randomBytes(24).toString('hex'),salt=randomBytes(16).toString('hex');const objects=new Map();
   const env={ADMIN_USERNAME:'exrental119',ADMIN_PASSWORD_HASH:`100000:${salt}:${pbkdf2Sync(password,salt,100000,32,'sha256').toString('hex')}`,DB:{prepare:stmt,batch:async list=>Promise.all(list.map(s=>s.run()))},IMAGES:{put:async(k,bytes,options)=>objects.set(k,{body:bytes,...options}),head:async k=>objects.get(k)||null,get:async k=>objects.get(k)||null}};
@@ -97,3 +97,4 @@ test('case descriptions stay private until publish and survive older admin saves
  const legacy=structuredClone(data);delete legacy.works[0].description;const old=await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision,content:legacy})});assert.equal(old.status,200);revision=(await old.json()).revision;assert.equal((await (await s.request('/api/admin/content',{headers})).json()).content.works[0].description,data.works[0].description);
  data.works[0].description='x'.repeat(2001);assert.equal((await s.request('/api/admin/content',{method:'PUT',headers,body:JSON.stringify({revision,content:data})})).status,400);data.works[0].description='';assert.equal((await s.request('/api/admin/publish',{method:'POST',headers,body:JSON.stringify({revision,content:data})})).status,200);assert.equal((await (await s.request('/api/public/content')).json()).works[0].description,undefined);
 });
+
