@@ -1,5 +1,6 @@
 import seed from './seed.json' with { type: 'json' };
 import {inventoryRoute} from './inventory.mjs';
+import {scheduleRoute} from './schedule.mjs';
 import serviceDefaults from './services-defaults.json' with { type: 'json' };
 import servicePageDefaults from './service-page-defaults.json' with { type: 'json' };
 
@@ -137,6 +138,7 @@ async function login(request, env) {
 async function route(request, env) {
   const url = new URL(request.url), path = url.pathname, method = request.method;
   if (path === '/api/inventory' || path === '/api/admin/inventory' || path === '/api/admin/inventory/link') return inventoryRoute(request,env,{json,fail,random,equal,session,readJSON});
+  if (path === '/api/schedule' || path === '/api/admin/schedule') return scheduleRoute(request,env,{json,fail,random,equal,session,readJSON});
   if (path === '/api/public/content' && method === 'GET') {
     await ensureContent(env);
     const row = await env.DB.prepare('SELECT published_json FROM content WHERE id=1').first();

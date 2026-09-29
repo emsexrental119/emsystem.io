@@ -2,6 +2,7 @@
 const admin=location.pathname.startsWith('/admin/'), $=s=>document.querySelector(s);
 let state, csrf, busy=false, editIndex=-1, moveIndex=-1, direction=1, shipmentIndex=-1;
 const token=location.hash.slice(1);
+if(!admin)$('#schedule-link').href='/schedule/#'+token;
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 function status(text,error=false){$('#status').textContent=text;$('#status').className=error?'error':'';}
 async function api(path,options={}){const response=await fetch(path,{...options,cache:'no-store',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(admin&&csrf?{'X-CSRF-Token':csrf}:{}),...(!admin?{Authorization:'Bearer '+token}:{}),...options.headers}});const data=await response.json();if(!response.ok)throw new Error(data.error||'요청을 처리하지 못했습니다.');return data;}

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>행사 일정 · EMSYSTEM</title><link rel="stylesheet" href="/stock/style.css"><link rel="stylesheet" href="/schedule/style.css"><script src="/schedule/app.js" defer></script></head>
+<body><header><a class="brand" href="https://emsystem.co.kr/">EMSYSTEM</a><span>직원 공유 · 조회 전용</span><a id="stock-link" href="/stock/">재고 조회</a></header>
+<main><div class="heading"><div><p class="eyebrow">설치 · 철거</p><h1>행사 일정</h1><p class="muted">날짜별 설치·철거 일정과 행사별 품목을 확인하세요.</p></div><div class="actions"><button id="refresh">새로고침</button></div></div><p id="status" role="status">일정을 불러오고 있습니다.</p>
+<div id="content" hidden>
+
+<section class="month-tools"><button id="prev" aria-label="이전 달">←</button><label>조회 월<input id="month" type="month" min="2000-01" max="2100-12"></label><button id="next" aria-label="다음 달">→</button><button id="today">이번 달</button><label class="search">행사·품목 검색<input id="search" type="search" placeholder="행사명, 사이즈, 비고"></label></section>
+<div class="schedule-summary"><span id="event-count"></span><span id="install-count"></span><span id="remove-count"></span></div>
+<div class="legend"><span class="install">설치</span><span class="removal">철거</span><span>일정을 누르면 해당 행사로 이동합니다.</span></div>
+<div class="calendar-scroll"><section id="calendar" class="calendar" aria-label="월별 설치·철거 달력"></section></div>
+<div class="section-heading"><h2 id="list-title">행사별 상세</h2><span id="updated" class="muted"></span></div><div id="events"></div><p id="empty" hidden>이 달에 해당하는 일정이 없습니다.</p>
+<p class="footnote">직원용 조회 화면입니다. 일정 수정은 관리자에게 요청해 주세요.</p></div>
+
+</main></body></html>

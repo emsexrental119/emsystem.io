@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS schedule (
+ id INTEGER PRIMARY KEY CHECK(id=1),
+ events_json TEXT NOT NULL DEFAULT '[]',
+ revision INTEGER NOT NULL DEFAULT 1,
+ updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS schedule_history (
+ revision INTEGER PRIMARY KEY,
+ events_json TEXT NOT NULL,
+ actor TEXT NOT NULL,
+ updated_at INTEGER NOT NULL
+);
