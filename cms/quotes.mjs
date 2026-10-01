@@ -47,22 +47,16 @@ export function exportQuote(template,q){
  sheet=setCell(sheet,'B2',Date.parse(q.date)/86400000+25569);
  for(const [cell,key]of [['B4','customer'],['B5','project'],['B6','period'],['B7','contact'],['B8','person'],['B9','email']]){
   sheet=setCell(sheet,cell,q[key]);
-  const height=Math.max(15,Math.ceil(q[key].length/22)*14);
-  sheet=sheet.replace(new RegExp('(<x:row r="'+cell.slice(1)+'"[^>]* ht=")[^"]+"'),(_,p)=>p+height+'"');
  }
  let subtotal=0;
  for(let r=13;r<=end;r++){
   const i=q.items[r-13];const amount=i?i.quantity*i.price:0;subtotal+=amount;
   for(const [c,value]of [['A',i?r-12:''],['B',i?.name||''],['C',i?.size||''],['E',i?.quantity??''],['F',i?.price??''],['H',i?.note||'']])sheet=setCell(sheet,c+r,value);
   sheet=setCell(sheet,'G'+r,amount,'E'+r+'*F'+r);
-  if(i){const lines=Math.max(Math.ceil(i.name.length/12),Math.ceil(i.size.length/16),Math.ceil(i.note.length/10),1);sheet=sheet.replace(new RegExp('(<x:row r="'+r+'"[^>]* ht=")[^"]+"'),(_,p)=>p+Math.max(27,lines*14)+'"');}
  }
  const vat=Math.round(subtotal*0.1),grand=subtotal+vat;
  sheet=setCell(sheet,'G'+summary,subtotal,'SUM(G13:G'+end+')');sheet=setCell(sheet,'H'+summary,vat,'ROUND(G'+summary+'*10%,0)');sheet=setCell(sheet,'G'+total,grand,'G'+summary+'+H'+summary);sheet=setCell(sheet,'B10',grand,'G'+total);
- sheet=sheet.replace('<x:sheetViews>','<x:sheetPr><x:pageSetUpPr fitToPage="1"/></x:sheetPr><x:sheetViews>');
- // Replace template defaults: SpreadsheetML permits one of each, in this order.
- sheet=sheet.replace(/<x:(printOptions|pageMargins|pageSetup)\b[^>]*?(?:\/>|>[\s\S]*?<\/x:\1>)/g,'');
- sheet=sheet.replace('</x:worksheet>','<x:printOptions horizontalCentered="1"/><x:pageMargins left="0.25" right="0.25" top="0.3" bottom="0.3" header="0" footer="0"/><x:pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="'+(extra?0:1)+'"/></x:worksheet>');
+ // Keep the company's template dimensions, styles and print settings unchanged.
  files[path]=strToU8(sheet);
  let workbook=strFromU8(files['xl/workbook.xml']);
  workbook=workbook.replace('</x:workbook>',"<x:definedNames><x:definedName name=\"_xlnm.Print_Area\" localSheetId=\"0\">'장치 견적서'!$A$1:$H$"+(37+extra)+'</x:definedName></x:definedNames><x:calcPr fullCalcOnLoad="1"/></x:workbook>');
