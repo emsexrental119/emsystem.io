@@ -14,11 +14,11 @@ function select(root,key,title,options){
  for(const [value,text]of options){const option=node('option',text);option.value=value;input.append(option);}
  label.append(input);root.append(label);return input;
 }
-function pricing(row){return {mode:form.elements.pricingMode.value,component:'both',product:get(row,'product').value,printStyle:get(row,'printStyle').value,width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
+function pricing(row){return {mode:form.elements.pricingMode.value,component:'both',product:get(row,'product').value,printStyle:get(row,'printStyle').value,printSides:Number(get(row,'printSides').value),width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
 function sync(row,changeName=false){
  const auto=get(row,'product').value!=='manual',price=get(row,'price'),size=get(row,'size'),detail=row.querySelector('.price-detail');
  row.querySelector('.quote-calculator').hidden=!auto;
- for(const k of ['width','height','thickness','printStyle']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
+ for(const k of ['width','height','thickness','printStyle','printSides']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
  price.readOnly=auto;size.readOnly=auto;
  price.setCustomValidity('');get(row,'width').setCustomValidity('');
  get(row,'name').readOnly=auto;
@@ -30,6 +30,7 @@ function sync(row,changeName=false){
  try{
   const result=fabricPrice(input,config);price.value=result.price;
   const parts=['본체 '+money(result.frame),'인쇄비 '+money(result.printing)];
+  if(input.printSides===2)parts.push('양면인쇄 · 인쇄비 2배');
   if(input.mode==='dispatch')parts.push('본체 가로 '+result.meters+'m 적용');
   parts.push(input.printStyle==='included'?'한 줄에 합산 · 비고에 인쇄비 포함 기재':'본체와 인쇄비를 두 줄로 분리 · 수량은 동일하게 적용');
   detail.textContent=parts.join(' · ');
@@ -42,6 +43,7 @@ function addItem(){
  const controls=node('div');controls.className='quote-item-controls';
  select(controls,'product','품명 선택',[...Object.entries(fabricProducts),['manual','기타 · 직접 입력']]);
  select(controls,'printStyle','인쇄비 표시',[['included','인쇄비 포함 · 한 줄로 합산'],['separate','인쇄비 별도 · 두 줄로 분리']]);
+ select(controls,'printSides','인쇄 면',[['1','단면 인쇄'],['2','양면 인쇄 · 인쇄비 2배']]);
  const remove=node('button','품목 삭제');remove.type='button';remove.onclick=()=>{if(busy)return;if($('#items').children.length===1){status('품목을 하나 이상 입력해 주세요.',true);return;}row.remove();dirty=true;totals();};controls.append(remove);row.append(controls);
  const calc=node('div');calc.className='quote-calculator';
  field(calc,'width','가로 (mm)','number',100000);

@@ -15,8 +15,9 @@ export function validateQuote(data,config){
   const p=i.pricing;
   if(!Object.hasOwn(fabricProducts,p.product)||!['included','separate'].includes(p.printStyle))invalid('페브릭 품명과 인쇄비 표시 방법을 선택해 주세요.');
   const name=fabricProducts[p.product],note=text(i.note??'',150);
-  if(p.printStyle==='included')return [{...i,name,note:note.includes('인쇄비 포함')?note:[note,'인쇄비 포함'].filter(Boolean).join(' / '),pricing:{...p,component:'both'}}];
-  return [{...i,name,note,pricing:{...p,component:'frame'}},{...i,name:'인쇄비',note:'',pricing:{...p,component:'print'}}];
+  const doubleNote=p.printSides===2?'양면인쇄':'';
+  if(p.printStyle==='included')return [{...i,name,note:[note,...['인쇄비 포함',doubleNote].filter(n=>n&&!note.includes(n))].filter(Boolean).join(' / '),pricing:{...p,component:'both'}}];
+  return [{...i,name,note,pricing:{...p,component:'frame'}},{...i,name:'인쇄비',note:doubleNote,pricing:{...p,component:'print'}}];
  });
  if(expanded.length>100)invalid('인쇄비 별도 줄을 포함해 견적 품목은 100줄까지 가능합니다.');
  q.items=expanded.map(i=>{
