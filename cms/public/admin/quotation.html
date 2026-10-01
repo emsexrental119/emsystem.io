@@ -12,9 +12,9 @@
 <label>담당자<input name="person" maxlength="80"></label>
 <label>이메일<input name="email" maxlength="120" type="email"></label>
 </div></section>
-<section class="quote-panel"><div class="heading"><h2>견적 품목</h2><button type="button" id="add-item">＋ 품목 추가</button></div><p class="muted">페브릭 종류와 인쇄비 포함·별도를 선택하세요. 포함은 본체와 인쇄비를 합산하고 비고에 ‘인쇄비 포함’을 표시합니다. 별도는 본체와 인쇄비를 각각 한 줄씩 표시합니다. 가로·높이는 mm로 입력하며, 출고 본체는 가로를 1m 단위로 올림하고 인쇄비는 실제 면적을 적용합니다. 각 단가는 원 미만 반올림하며 부가세는 별도입니다.</p>
+<section class="quote-panel"><div class="heading"><h2>견적 품목</h2></div><p class="muted">페브릭 종류와 인쇄비 포함·별도를 선택하세요. 포함은 본체와 인쇄비를 합산하고 비고에 ‘인쇄비 포함’을 표시합니다. 별도는 본체와 인쇄비를 각각 한 줄씩 표시합니다. 가로·높이는 mm로 입력하며, 출고 본체는 가로를 1m 단위로 올림하고 인쇄비는 실제 면적을 적용합니다. 각 단가는 원 미만 반올림하며 부가세는 별도입니다.</p>
 <div class="quote-pricing-mode"><label for="pricing-mode">단가 종류 · 견적서 전체 적용</label><select id="pricing-mode" name="pricingMode" required><option value="general">일반단가</option><option value="contract">장치단가</option><option value="dispatch">출고단가</option></select><p class="muted">선택한 단가가 모든 페브릭 품목에 동일하게 적용됩니다. 변경하면 입력한 품목과 합계가 함께 다시 계산됩니다.</p></div>
-<div id="items"></div></section>
+<div id="items"></div><button type="button" id="add-item" class="quote-add-item">＋ 품목 추가</button></section>
 <section class="quote-totals"><div><span>공급가액</span><strong id="subtotal">0원</strong></div><div><span>부가세 10%</span><strong id="vat">0원</strong></div><div><span>합계 · VAT 포함</span><strong id="total">0원</strong></div></section>
 <p class="footnote">작성 내용은 서버에 저장되지 않습니다. 작업을 마치면 엑셀로 내려받아 보관해 주세요. 회사 정보와 하단 안내문은 기존 양식대로 들어갑니다.</p>
 <div class="quote-actions"><button type="submit" class="primary" id="download">엑셀 다운로드 (.xlsx)</button></div>
