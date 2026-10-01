@@ -8,6 +8,18 @@ import worker from '../worker.mjs';
 import {validateQuote,exportQuote} from '../quotes.mjs';
 const input=()=>({date:'2026-10-01',customer:'테스트 업체',items:[{name:'장치',size:'2500x2500',quantity:7,price:1000,note:'인쇄비 포함'},{name:'장치',quantity:2,price:2000},{name:'장치',quantity:1,price:3000}]});
 function template(){let rows='';for(let r=1;r<=37;r++){rows+='<x:row r="'+r+'" ht="15">';for(const c of 'ABCDEFGH')rows+='<x:c r="'+c+r+'" s="1" />';rows+='</x:row>';}return zipSync({'xl/worksheets/sheet1.xml':strToU8('<x:worksheet xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><x:sheetViews/><x:sheetData>'+rows+'</x:sheetData><x:mergeCells count="1"><x:mergeCell ref="G27:H27" /></x:mergeCells></x:worksheet>'),'xl/workbook.xml':strToU8('<x:workbook></x:workbook>')});}
+test('rental template uses its own 16 item rows, totals and print area',()=>{
+ const files=unzipSync(template());
+ let sheet=strFromU8(files['xl/worksheets/sheet1.xml']);
+ sheet=sheet.replace('</x:sheetData>',[38,39,40].map(r=>'<x:row r="'+r+'" ht="15">'+[...'ABCDEFGH'].map(c=>'<x:c r="'+c+r+'" s="1" />').join('')+'</x:row>').join('')+'</x:sheetData>').replace('G27:H27','G30:H30');
+ files['xl/worksheets/sheet1.xml']=strToU8(sheet);
+ const q=validateQuote({...input(),company:'rental119'});
+ let output=unzipSync(exportQuote(zipSync(files),q)),xml=strFromU8(output['xl/worksheets/sheet1.xml']);
+ assert.match(xml,/SUM\(G13:G28\)/);assert.match(xml,/<x:f>G30<\/x:f><x:v>15400<\/x:v>/);assert.match(strFromU8(output['xl/workbook.xml']),/\$H\$40/);
+ q.items=Array(20).fill(q.items[0]);output=unzipSync(exportQuote(zipSync(files),q));xml=strFromU8(output['xl/worksheets/sheet1.xml']);
+ assert.match(xml,/SUM\(G13:G32\)/);assert.match(xml,/ref="G34:H34"/);assert.match(strFromU8(output['xl/workbook.xml']),/\$H\$44/);
+ assert.throws(()=>validateQuote({...input(),company:'unknown'}));
+});
 test('quote validates inputs, preserves amounts and emits safe literal strings with formulas',()=>{
  const q=validateQuote(input()),files=unzipSync(exportQuote(template(),q)),xml=strFromU8(files['xl/worksheets/sheet1.xml']);
  assert.match(xml,/<x:c r="G26"[^>]*><x:f>SUM\(G13:G25\)<\/x:f><x:v>14000<\/x:v>/);
@@ -42,7 +54,7 @@ test('template print settings and row heights remain unchanged when filling quot
  }
 });
 test('quote screen and export require admin session; employee token and missing CSRF are rejected',async()=>{
- const db=new DatabaseSync(':memory:');for(const f of ['0001_content.sql','0005_quote_template.sql','0006_quote_pricing.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
+ const db=new DatabaseSync(':memory:');for(const f of ['0001_content.sql','0005_quote_template.sql','0006_quote_pricing.sql','0007_quote_company_templates.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
  const statement=(s,p=[])=>({bind:(...p)=>statement(s,p),first:async()=>db.prepare(s).get(...p)||null});
  const token='a'.repeat(64),csrf='b'.repeat(64);db.prepare('INSERT INTO sessions VALUES (?,?,?)').run(createHash('sha256').update(token).digest('hex'),csrf,Date.now()+60000);
  db.prepare('INSERT INTO quote_template VALUES (1,?,?)').run(Buffer.from(template()).toString('base64'),Date.now());
@@ -57,5 +69,10 @@ test('quote screen and export require admin session; employee token and missing 
  assert.equal((await req('/api/admin/quotes/export',{method:'POST',headers:{Cookie:h.Cookie,Origin:h.Origin},body:payload})).status,403);
  assert.equal((await req('/api/admin/quotes/export',{method:'POST',headers:{...h,Origin:'https://other.test'},body:payload})).status,403);
  const r=await req('/api/admin/quotes/export',{method:'POST',headers:h,body:payload});assert.equal(r.status,200);assert.equal(r.headers.get('cache-control'),'private, no-store');assert.match(r.headers.get('content-disposition'),/attachment/);assert.equal(new Uint8Array(await r.arrayBuffer())[0],80);
+ const rentalBody=JSON.stringify({...input(),company:'rental119'});
+ assert.equal((await req('/api/admin/quotes/export',{method:'POST',headers:h,body:rentalBody})).status,503);
+ db.prepare('INSERT INTO quote_company_templates VALUES (?,?,?)').run('rental119',Buffer.from(template()).toString('base64'),Date.now());
+ const rental=await req('/api/admin/quotes/export',{method:'POST',headers:h,body:rentalBody});assert.equal(rental.status,200);
+ assert.match(strFromU8(unzipSync(new Uint8Array(await rental.arrayBuffer()))['xl/worksheets/sheet1.xml']),/SUM\(G13:G28\)/);
  db.prepare('UPDATE sessions SET expires_at=0').run();assert.equal((await req('/api/admin/quotes/export',{method:'POST',headers:h,body:payload})).status,401);
 });

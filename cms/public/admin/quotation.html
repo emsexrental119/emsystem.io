@@ -3,6 +3,7 @@
 <body><header><a class="brand" href="/admin/">EMSYSTEM</a><span>관리자 · 견적서 작성</span><a href="/admin/schedule.html">일정 관리</a><a href="/admin/">홈페이지 관리</a></header>
 <main><div class="heading"><div><p class="eyebrow">장치업체 견적서</p><h1>견적서 작성</h1><p class="muted">회사 양식으로 작성하고 엑셀 파일을 내려받으세요.</p></div></div><p id="status" role="status">관리자 권한을 확인하고 있습니다.</p>
 <form id="quote-form" hidden>
+<section class="quote-panel"><h2>견적서 양식 선택</h2><div class="quote-company"><label><input type="radio" name="company" value="rental119" required> 전시렌탈119 견적서</label><label><input type="radio" name="company" value="emsystem" checked required> 이엠시스템 견적서</label></div><p class="muted">선택한 회사의 원본 양식으로 다운로드됩니다.</p></section>
 <section class="quote-panel"><h2>견적 정보</h2><div class="quote-fields">
 <label>견적일<input name="date" type="date" required min="2000-01-01" max="2099-12-31"></label>
 <label>업체명<input name="customer" maxlength="80" required placeholder="견적을 받는 업체"></label>

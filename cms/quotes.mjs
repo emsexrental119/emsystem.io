@@ -5,6 +5,8 @@ const text=(value,max,required=false)=>{if(typeof value!=='string'||value.length
 export function validateQuote(data,config){
  if(!data||!Array.isArray(data.items)||data.items.length<1||data.items.length>100)invalid('품목은 1~100개까지 입력해 주세요.');
  const q={};for(const [key,max,required]of [['date',10,true],['customer',80,true],['project',100,false],['period',80,false],['contact',80,false],['person',80,false],['email',120,false]])q[key]=text(data[key]??'',max,required);
+ q.company=data.company??'emsystem';
+ if(!['emsystem','rental119'].includes(q.company))invalid('견적서 양식을 선택해 주세요.');
  if(!/^20\d\d-\d\d-\d\d$/.test(q.date)||!Number.isFinite(Date.parse(q.date))||new Date(q.date).toISOString().slice(0,10)!==q.date)invalid('견적일을 확인해 주세요.');
  const modes=[...new Set(data.items.filter(i=>i?.pricing).map(i=>i.pricing.mode))];
  const pricingMode=data.pricingMode??(modes.length===1?modes[0]:undefined);
@@ -15,9 +17,8 @@ export function validateQuote(data,config){
   const p=i.pricing;
   if(!Object.hasOwn(fabricProducts,p.product)||!['included','separate'].includes(p.printStyle))invalid('페브릭 품명과 인쇄비 표시 방법을 선택해 주세요.');
   const name=fabricProducts[p.product],note=text(i.note??'',150);
-  const doubleNote=p.printSides===2?'양면인쇄':'';
-  if(p.printStyle==='included')return [{...i,name,note:[note,...['인쇄비 포함',doubleNote].filter(n=>n&&!note.includes(n))].filter(Boolean).join(' / '),pricing:{...p,component:'both'}}];
-  return [{...i,name,note,pricing:{...p,component:'frame'}},{...i,name:'인쇄비',note:doubleNote,pricing:{...p,component:'print'}}];
+  if(p.printStyle==='included')return [{...i,name,note:note.includes('인쇄비 포함')?note:[note,'인쇄비 포함'].filter(Boolean).join(' / '),pricing:{...p,component:'both'}}];
+  return [{...i,name,note,pricing:{...p,component:'frame'}},{...i,name:'인쇄비',quantity:i.quantity*(p.printSides??1),note:'',pricing:{...p,component:'print',printSides:1}}];
  });
  if(expanded.length>100)invalid('인쇄비 별도 줄을 포함해 견적 품목은 100줄까지 가능합니다.');
  q.items=expanded.map(i=>{
@@ -49,15 +50,16 @@ function setCell(sheet,address,value,formula){
 }
 export function exportQuote(template,q){
  const files=unzipSync(template),path='xl/worksheets/sheet1.xml';let sheet=strFromU8(files[path]);
- const extra=Math.max(0,q.items.length-13),end=25+extra,summary=26+extra,total=27+extra;
+ const baseEnd=q.company==='rental119'?28:25,baseSummary=baseEnd+1;
+ const extra=Math.max(0,q.items.length-(baseEnd-12)),end=baseEnd+extra,summary=baseSummary+extra,total=summary+1;
  if(extra){
-  const row=sheet.match(/<x:row r="25"[^>]*>[\s\S]*?<\/x:row>/)[0];
-  sheet=sheet.replace(/(<x:row r="|<x:c r="[A-Z]+)(\d+)"/g,(m,p,n)=>p+(+n>=26?+n+extra:+n)+'"');
-  const rows=Array.from({length:extra},(_,i)=>row.replace(/(<x:row r="|<x:c r="[A-Z]+)25"/g,(_,p)=>p+(26+i)+'"')).join('');
+  const row=sheet.match(new RegExp('<x:row r="'+baseEnd+'"[^>]*>[\\s\\S]*?</x:row>'))[0];
+  sheet=sheet.replace(/(<x:row r="|<x:c r="[A-Z]+)(\d+)"/g,(m,p,n)=>p+(+n>=baseSummary?+n+extra:+n)+'"');
+  const rows=Array.from({length:extra},(_,i)=>row.replace(new RegExp('(<x:row r="|<x:c r="[A-Z]+)'+baseEnd+'"','g'),(_,p)=>p+(baseSummary+i)+'"')).join('');
   sheet=sheet.replace('</x:sheetData>',rows+'</x:sheetData>');
   sheet=sheet.replace(/<x:sheetData>([\s\S]*?)<\/x:sheetData>/,(_,body)=>'<x:sheetData>'+[...body.matchAll(/<x:row\b[^>]*>[\s\S]*?<\/x:row>/g)].map(m=>m[0]).sort((a,b)=>+a.match(/r="(\d+)"/)[1]-+b.match(/r="(\d+)"/)[1]).join('')+'</x:sheetData>');
-  sheet=sheet.replace(/<x:mergeCell ref="([^"]+)"\s*\/>/g,(_,range)=>'<x:mergeCell ref="'+range.replace(/([A-Z]+)(\d+)/g,(_,c,r)=>c+(+r>=26?+r+extra:+r))+'" />');
-  sheet=sheet.replace('</x:mergeCells>',Array.from({length:extra},(_,i)=>'<x:mergeCell ref="C'+(26+i)+':D'+(26+i)+'" />').join('')+'</x:mergeCells>');
+  sheet=sheet.replace(/<x:mergeCell ref="([^"]+)"\s*\/>/g,(_,range)=>'<x:mergeCell ref="'+range.replace(/([A-Z]+)(\d+)/g,(_,c,r)=>c+(+r>=baseSummary?+r+extra:+r))+'" />');
+  sheet=sheet.replace('</x:mergeCells>',Array.from({length:extra},(_,i)=>'<x:mergeCell ref="C'+(baseSummary+i)+':D'+(baseSummary+i)+'" />').join('')+'</x:mergeCells>');
   sheet=sheet.replace(/(<x:mergeCells count=")(\d+)"/,(_,p,n)=>p+(+n+extra)+'"');
  }
  sheet=setCell(sheet,'B2',Date.parse(q.date)/86400000+25569);
@@ -75,7 +77,7 @@ export function exportQuote(template,q){
  // Keep the company's template dimensions, styles and print settings unchanged.
  files[path]=strToU8(sheet);
  let workbook=strFromU8(files['xl/workbook.xml']);
- workbook=workbook.replace('</x:workbook>',"<x:definedNames><x:definedName name=\"_xlnm.Print_Area\" localSheetId=\"0\">'장치 견적서'!$A$1:$H$"+(37+extra)+'</x:definedName></x:definedNames><x:calcPr fullCalcOnLoad="1"/></x:workbook>');
+ workbook=workbook.replace('</x:workbook>',"<x:definedNames><x:definedName name=\"_xlnm.Print_Area\" localSheetId=\"0\">'장치 견적서'!$A$1:$H$"+(baseEnd+12+extra)+'</x:definedName></x:definedNames><x:calcPr fullCalcOnLoad="1"/></x:workbook>');
  files['xl/workbook.xml']=strToU8(workbook);
  return zipSync(files,{level:6});
 }
@@ -97,7 +99,7 @@ export async function quoteRoute(request,env,helpers){
   config=JSON.parse(r.config_json);
  }
  const q=validateQuote(data,config);
- const record=await env.DB.prepare('SELECT xlsx_base64 FROM quote_template WHERE id=1').first();if(!record)fail('견적서 양식을 준비하고 있습니다.',503);
+ const record=q.company==='emsystem'?await env.DB.prepare('SELECT xlsx_base64 FROM quote_template WHERE id=1').first():await env.DB.prepare('SELECT xlsx_base64 FROM quote_company_templates WHERE company=?').bind(q.company).first();if(!record)fail('선택한 견적서 양식을 준비하고 있습니다.',503);
  const bytes=Uint8Array.from(atob(record.xlsx_base64),c=>c.charCodeAt(0)),file=exportQuote(bytes,q);
  const name=(q.customer+'_'+q.date+'_견적서.xlsx').replace(/[\\/:*?"<>|\r\n]/g,'_');
  return new Response(file,{headers:{'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':"attachment; filename=quotation.xlsx; filename*=UTF-8''"+encodeURIComponent(name),'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow','Referrer-Policy':'no-referrer'}});

@@ -40,8 +40,8 @@ test('double-sided printing doubles only printing across modes, rounding and quo
   assert.equal(two.frame,one.frame);assert.equal(two.printing,one.printing*2);
   const quote=printStyle=>validateQuote({date:'2026-10-01',customer:'테스트',pricingMode:mode,items:[{name:'x',quantity:3,price:1,pricing:{...p,printStyle,printSides:2}}]},config).items;
   const combined=quote('included'),split=quote('separate');
-  assert.equal(combined[0].price,two.price);assert.equal(combined[0].note,'인쇄비 포함 / 양면인쇄');
-  assert.deepEqual(split.map(i=>i.price),[one.frame,one.printing*2]);assert.deepEqual(split.map(i=>i.quantity),[3,3]);assert.equal(split[1].note,'양면인쇄');
+  assert.equal(combined[0].price,two.price);assert.equal(combined[0].note,'인쇄비 포함');
+  assert.deepEqual(split.map(i=>i.price),[one.frame,one.printing]);assert.deepEqual(split.map(i=>i.quantity),[3,6]);assert.equal(split[1].note,'');
  }
  for(const printSides of [0,3,-1,1.5,'2'])assert.throws(()=>fabricPrice({mode:'general',width:100,height:100,component:'both',printSides},config));
 });

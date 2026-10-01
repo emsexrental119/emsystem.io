@@ -32,7 +32,7 @@ function sync(row,changeName=false){
   const parts=['본체 '+money(result.frame),'인쇄비 '+money(result.printing)];
   if(input.printSides===2)parts.push('양면인쇄 · 인쇄비 2배');
   if(input.mode==='dispatch')parts.push('본체 가로 '+result.meters+'m 적용');
-  parts.push(input.printStyle==='included'?'한 줄에 합산 · 비고에 인쇄비 포함 기재':'본체와 인쇄비를 두 줄로 분리 · 수량은 동일하게 적용');
+  parts.push(input.printStyle==='included'?'한 줄에 합산 · 비고에 인쇄비 포함 기재':input.printSides===2?'본체와 인쇄비를 두 줄로 분리 · 인쇄비 수량 2배 적용':'본체와 인쇄비를 두 줄로 분리 · 수량은 동일하게 적용');
   detail.textContent=parts.join(' · ');
  }catch(e){price.value='';get(row,'width').setCustomValidity(e.message);detail.textContent=e.message;}
 }
