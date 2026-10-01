@@ -60,6 +60,8 @@ export function exportQuote(template,q){
  const vat=Math.round(subtotal*0.1),grand=subtotal+vat;
  sheet=setCell(sheet,'G'+summary,subtotal,'SUM(G13:G'+end+')');sheet=setCell(sheet,'H'+summary,vat,'ROUND(G'+summary+'*10%,0)');sheet=setCell(sheet,'G'+total,grand,'G'+summary+'+H'+summary);sheet=setCell(sheet,'B10',grand,'G'+total);
  sheet=sheet.replace('<x:sheetViews>','<x:sheetPr><x:pageSetUpPr fitToPage="1"/></x:sheetPr><x:sheetViews>');
+ // Replace template defaults: SpreadsheetML permits one of each, in this order.
+ sheet=sheet.replace(/<x:(printOptions|pageMargins|pageSetup)\b[^>]*?(?:\/>|>[\s\S]*?<\/x:\1>)/g,'');
  sheet=sheet.replace('</x:worksheet>','<x:printOptions horizontalCentered="1"/><x:pageMargins left="0.25" right="0.25" top="0.3" bottom="0.3" header="0" footer="0"/><x:pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="'+(extra?0:1)+'"/></x:worksheet>');
  files[path]=strToU8(sheet);
  let workbook=strFromU8(files['xl/workbook.xml']);

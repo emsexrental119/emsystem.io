@@ -18,6 +18,17 @@ test('quote validates inputs, preserves amounts and emits safe literal strings w
  const rows=[...extended.matchAll(/<x:row r="(\d+)"/g)].map(m=>+m[1]);assert.equal(new Set(rows).size,40);assert.deepEqual(rows,[...rows].sort((a,b)=>a-b));
  for(const d of [{...input(),date:'2026-02-30'},{...input(),customer:''},{...input(),items:[]},{...input(),items:[{name:'x',quantity:1.2,price:1}]},{...input(),items:[{name:'x',quantity:1,price:-1}]},{...input(),items:[{name:'x',quantity:1000000,price:1000000000}]}])assert.throws(()=>validateQuote(d));
 });
+test('existing template print settings are replaced once in schema order',()=>{
+ for(const count of [1,16]){
+  const files=unzipSync(template());
+  files['xl/worksheets/sheet1.xml']=strToU8(strFromU8(files['xl/worksheets/sheet1.xml']).replace('</x:worksheet>','<x:printOptions/><x:pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/><x:pageSetup paperSize="1"></x:pageSetup></x:worksheet>'));
+  const q=validateQuote(input());q.items=Array.from({length:count},()=>q.items[0]);
+  const xml=strFromU8(unzipSync(exportQuote(zipSync(files),q))['xl/worksheets/sheet1.xml']);
+  for(const tag of ['printOptions','pageMargins','pageSetup'])assert.equal(xml.split('<x:'+tag).length-1,1);
+  assert.match(xml,/<\/x:mergeCells><x:printOptions[^>]*\/><x:pageMargins[^>]*\/><x:pageSetup[^>]*\/><\/x:worksheet>/);
+  assert.match(xml,new RegExp('fitToHeight="'+(count>13?0:1)+'"'));
+ }
+});
 test('quote screen and export require admin session; employee token and missing CSRF are rejected',async()=>{
  const db=new DatabaseSync(':memory:');for(const f of ['0001_content.sql','0005_quote_template.sql','0006_quote_pricing.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
  const statement=(s,p=[])=>({bind:(...p)=>statement(s,p),first:async()=>db.prepare(s).get(...p)||null});
