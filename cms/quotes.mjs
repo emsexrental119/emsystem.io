@@ -27,6 +27,8 @@ function setCell(sheet,address,value,formula){
  sheet=sheet.replace(pattern,old=>{found=true;const style=old.match(/ s="([^"]+)"/)?.[1];const start='<x:c r="'+address+'"'+(style?' s="'+style+'"':'');
  if(formula)return start+'><x:f>'+xml(formula)+'</x:f><x:v>'+value+'</x:v></x:c>';
  if(typeof value==='number')return start+'><x:v>'+value+'</x:v></x:c>';
+ // An empty inline string is text in Excel arithmetic; emit a genuinely blank cell.
+ if(value==='')return start+' />';
  return start+' t="inlineStr"><x:is><x:t xml:space="preserve">'+xml(value)+'</x:t></x:is></x:c>';});
  if(!found)throw Error('Template cell missing: '+address);
  return sheet;

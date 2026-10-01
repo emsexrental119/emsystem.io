@@ -18,6 +18,17 @@ test('quote validates inputs, preserves amounts and emits safe literal strings w
  const rows=[...extended.matchAll(/<x:row r="(\d+)"/g)].map(m=>+m[1]);assert.equal(new Set(rows).size,40);assert.deepEqual(rows,[...rows].sort((a,b)=>a-b));
  for(const d of [{...input(),date:'2026-02-30'},{...input(),customer:''},{...input(),items:[]},{...input(),items:[{name:'x',quantity:1.2,price:1}]},{...input(),items:[{name:'x',quantity:1,price:-1}]},{...input(),items:[{name:'x',quantity:1000000,price:1000000000}]}])assert.throws(()=>validateQuote(d));
 });
+test('unused quantity and price cells are truly blank so Excel can recalculate row products',()=>{
+ const q=validateQuote(input());q.items=q.items.slice(0,1);
+ const xml=strFromU8(unzipSync(exportQuote(template(),q))['xl/worksheets/sheet1.xml']);
+ for(let r=14;r<=25;r++){
+  for(const c of ['E','F'])assert.match(xml,new RegExp('<x:c r="'+c+r+'" s="1" />'));
+  assert.match(xml,new RegExp('<x:c r="G'+r+'" s="1"><x:f>E'+r+'\\*F'+r+'</x:f><x:v>0</x:v></x:c>'));
+ }
+ assert.match(xml,/<x:c r="E13" s="1"><x:v>7<\/x:v><\/x:c>/);
+ assert.match(xml,/<x:c r="F13" s="1"><x:v>1000<\/x:v><\/x:c>/);
+ assert.match(xml,/<x:c r="B10" s="1"><x:f>G27<\/x:f><x:v>7700<\/x:v><\/x:c>/);
+});
 test('template print settings and row heights remain unchanged when filling quotes',()=>{
  for(const count of [1,16]){
   const files=unzipSync(template());
