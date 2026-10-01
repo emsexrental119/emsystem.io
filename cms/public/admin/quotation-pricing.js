@@ -1,3 +1,4 @@
+export const fabricProducts={backwall:'페브릭 백월',wing:'페브릭 날개',archColumn:'페브릭 아치기둥',archTop:'페브릭 아치상부',sign:'페브릭 간판'};
 export function fabricPrice(input,config){
  if(!input||!['general','contract','dispatch'].includes(input.mode)||!['frame','print','both'].includes(input.component))throw Error('패브릭 단가 종류와 품명을 선택해 주세요.');
  const {width,height,mode,component}=input;

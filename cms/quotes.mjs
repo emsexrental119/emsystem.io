@@ -1,12 +1,21 @@
 import {unzipSync,zipSync,strFromU8,strToU8} from 'fflate';
-import {fabricPrice} from './public/admin/quotation-pricing.js';
+import {fabricPrice,fabricProducts} from './public/admin/quotation-pricing.js';
 const invalid=message=>{throw Object.assign(new Error(message),{status:400});};
 const text=(value,max,required=false)=>{if(typeof value!=='string'||value.length>max||/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(value)||(required&&!value.trim()))invalid('필수 항목과 입력 길이를 확인해 주세요.');return value.trim();};
 export function validateQuote(data,config){
  if(!data||!Array.isArray(data.items)||data.items.length<1||data.items.length>100)invalid('품목은 1~100개까지 입력해 주세요.');
  const q={};for(const [key,max,required]of [['date',10,true],['customer',80,true],['project',100,false],['period',80,false],['contact',80,false],['person',80,false],['email',120,false]])q[key]=text(data[key]??'',max,required);
  if(!/^20\d\d-\d\d-\d\d$/.test(q.date)||!Number.isFinite(Date.parse(q.date))||new Date(q.date).toISOString().slice(0,10)!==q.date)invalid('견적일을 확인해 주세요.');
- q.items=data.items.map(i=>{
+ const expanded=data.items.flatMap(i=>{
+  if(i?.pricing?.product===undefined)return [i];
+  const p=i.pricing;
+  if(!Object.hasOwn(fabricProducts,p.product)||!['included','separate'].includes(p.printStyle))invalid('페브릭 품명과 인쇄비 표시 방법을 선택해 주세요.');
+  const name=fabricProducts[p.product],note=text(i.note??'',150);
+  if(p.printStyle==='included')return [{...i,name,note:note.includes('인쇄비 포함')?note:[note,'인쇄비 포함'].filter(Boolean).join(' / '),pricing:{...p,component:'both'}}];
+  return [{...i,name,note,pricing:{...p,component:'frame'}},{...i,name:'인쇄비',note:'',pricing:{...p,component:'print'}}];
+ });
+ if(expanded.length>100)invalid('인쇄비 별도 줄을 포함해 견적 품목은 100줄까지 가능합니다.');
+ q.items=expanded.map(i=>{
   if(!i)invalid('품목을 확인해 주세요.');
   let price=i.price,size=i.size??'';
   if(i.pricing!==undefined){

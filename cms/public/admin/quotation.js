@@ -1,4 +1,4 @@
-import {fabricPrice} from './quotation-pricing.js';
+import {fabricPrice,fabricProducts} from './quotation-pricing.js';
 const $=s=>document.querySelector(s),form=$('#quote-form');let csrf,config,busy=false,dirty=false;
 const money=n=>new Intl.NumberFormat('ko-KR').format(n)+'원';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
@@ -14,22 +14,24 @@ function select(root,key,title,options){
  for(const [value,text]of options){const option=node('option',text);option.value=value;input.append(option);}
  label.append(input);root.append(label);return input;
 }
-function pricing(row){return {mode:get(row,'mode').value,component:get(row,'component').value,width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
+function pricing(row){return {mode:get(row,'mode').value,component:'both',product:get(row,'product').value,printStyle:get(row,'printStyle').value,width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
 function sync(row,changeName=false){
- const component=get(row,'component').value,auto=component!=='manual',price=get(row,'price'),size=get(row,'size'),detail=row.querySelector('.price-detail');
+ const auto=get(row,'product').value!=='manual',price=get(row,'price'),size=get(row,'size'),detail=row.querySelector('.price-detail');
  row.querySelector('.quote-calculator').hidden=!auto;
- for(const k of ['width','height','mode','thickness']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
+ for(const k of ['width','height','mode','thickness','printStyle']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
  price.readOnly=auto;size.readOnly=auto;
  price.setCustomValidity('');get(row,'width').setCustomValidity('');
- if(changeName){get(row,'name').value=({both:'패브릭 금형+인쇄',frame:'패브릭 금형',print:'패브릭 인쇄',manual:''})[component];if(!auto){price.value='';size.value='';}}
+ get(row,'name').readOnly=auto;
+ if(auto)get(row,'name').value=fabricProducts[get(row,'product').value];
+ if(changeName&&!auto){get(row,'name').value='';price.value='';size.value='';}
  if(!auto){detail.textContent='직접 입력한 단가를 적용합니다.';return;}
  const input=pricing(row);size.value=input.width&&input.height?input.width+'x'+input.height+(input.thickness?'x'+input.thickness:''):'';
  if(!get(row,'width').value||!get(row,'height').value){price.value='';detail.textContent='가로와 높이를 입력하면 단가가 계산됩니다.';return;}
  try{
   const result=fabricPrice(input,config);price.value=result.price;
-  const parts=[];if(component!=='print')parts.push('금형 '+money(result.frame));if(component!=='frame')parts.push('인쇄 '+money(result.printing));
-  if(input.mode==='dispatch'&&component!=='print')parts.push('금형 가로 '+result.meters+'m 적용');
-  if(component!=='frame')parts.push('인쇄 면적 '+new Intl.NumberFormat('ko-KR',{maximumFractionDigits:6}).format(result.area)+'㎡');
+  const parts=['본체 '+money(result.frame),'인쇄비 '+money(result.printing)];
+  if(input.mode==='dispatch')parts.push('본체 가로 '+result.meters+'m 적용');
+  parts.push(input.printStyle==='included'?'한 줄에 합산 · 비고에 인쇄비 포함 기재':'본체와 인쇄비를 두 줄로 분리 · 수량은 동일하게 적용');
   detail.textContent=parts.join(' · ');
  }catch(e){price.value='';get(row,'width').setCustomValidity(e.message);detail.textContent=e.message;}
 }
@@ -38,25 +40,26 @@ function addItem(){
  if(busy)return;if($('#items').children.length>=100){status('품목은 100개까지 입력할 수 있습니다.',true);return;}
  const row=node('div');row.className='quote-item';
  const controls=node('div');controls.className='quote-item-controls';
- select(controls,'component','품명 선택',[['both','패브릭 금형+인쇄'],['frame','패브릭 금형'],['print','패브릭 인쇄'],['manual','기타 · 직접 입력']]);
+ select(controls,'product','품명 선택',[...Object.entries(fabricProducts),['manual','기타 · 직접 입력']]);
+ select(controls,'printStyle','인쇄비 표시',[['included','인쇄비 포함 · 한 줄로 합산'],['separate','인쇄비 별도 · 두 줄로 분리']]);
  const remove=node('button','품목 삭제');remove.type='button';remove.onclick=()=>{if(busy)return;if($('#items').children.length===1){status('품목을 하나 이상 입력해 주세요.',true);return;}row.remove();dirty=true;totals();};controls.append(remove);row.append(controls);
  const calc=node('div');calc.className='quote-calculator';
  select(calc,'mode','단가 종류',[['general','일반단가'],['contract','장치단가'],['dispatch','출고단가']]);
  field(calc,'width','가로 (mm)','number',100000);
  field(calc,'height','높이 (mm)','number',100000);
  field(calc,'thickness','두께 · 선택','text',30).placeholder='예: T140';row.append(calc);
- for(const [key,title,type,max,value]of [['name','견적서 표시 품명','text',80,'패브릭 금형+인쇄'],['size','규격','text',100,''],['quantity','수량','number',1000000,'1'],['price','단가 (원)','number',1000000000,''],['note','비고','text',150,'']]){const input=field(row,key,title,type,max,value);input.required=['name','quantity','price'].includes(key);}
+ for(const [key,title,type,max,value]of [['name','견적서 표시 품명','text',80,'페브릭 백월'],['size','규격','text',100,''],['quantity','수량','number',1000000,'1'],['price','단가 합계 (원)','number',1000000000,''],['note','추가 비고','text',150,'']]){const input=field(row,key,title,type,max,value);input.required=['name','quantity','price'].includes(key);}
  const detail=node('p');detail.className='price-detail';row.append(detail);
  const amount=node('p');amount.className='amount';row.append(amount);$('#items').append(row);sync(row);totals();
 }
 $('#add-item').onclick=()=>{addItem();dirty=true;};
-function changed(event){dirty=true;const row=event.target.closest('.quote-item');if(row)sync(row,event.target.dataset.key==='component');totals();}
+function changed(event){dirty=true;const row=event.target.closest('.quote-item');if(row)sync(row,event.target.dataset.key==='product');totals();}
 form.addEventListener('input',changed);form.addEventListener('change',event=>{if(event.target.tagName==='SELECT')changed(event);});
 form.onsubmit=async event=>{
  event.preventDefault();if(busy)return;
  const data=Object.fromEntries(new FormData(form));data.items=[...$('#items').children].map(row=>{
   const item=Object.fromEntries(['name','size','quantity','price','note'].map(k=>[k,['quantity','price'].includes(k)?Number(get(row,k).value):get(row,k).value]));
-  if(get(row,'component').value!=='manual')item.pricing=pricing(row);return item;
+  if(get(row,'product').value!=='manual')item.pricing=pricing(row);return item;
  });
  busy=true;form.querySelectorAll('button,input,select').forEach(n=>n.disabled=true);status('엑셀 파일을 만들고 있습니다.');
  try{

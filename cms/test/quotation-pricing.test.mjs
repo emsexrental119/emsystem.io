@@ -1,9 +1,28 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {fabricPrice} from '../public/admin/quotation-pricing.js';
+import {fabricPrice,fabricProducts} from '../public/admin/quotation-pricing.js';
 import {validateQuote} from '../quotes.mjs';
 // Synthetic rates: production price rules are stored privately in the database.
 const config={general:{frame:{numerator:2,denominator:100},print:{numerator:1,denominator:100}},contract:{frame:{numerator:17,denominator:1000},print:{numerator:7,denominator:1000}},dispatch:{perMeter:12345,print:{numerator:1,denominator:100}}};
+test('fabric names and print presentation are enforced on export with identical combined totals',()=>{
+ for(const mode of ['general','contract','dispatch'])for(const [product,name]of Object.entries(fabricProducts)){
+  const pricing={mode,component:'frame',product,printStyle:'included',width:970,height:2500,thickness:'T100'};
+  const item={name:'untrusted name',price:1,quantity:3,note:'메모',pricing};
+  const quote=items=>validateQuote({date:'2026-10-01',customer:'테스트',items},config);
+  const included=quote([item]).items,separate=quote([{...item,pricing:{...pricing,printStyle:'separate'}}]).items;
+  assert.equal(included.length,1);assert.equal(included[0].name,name);assert.equal(included[0].note,'메모 / 인쇄비 포함');
+  assert.deepEqual(separate.map(i=>i.name),[name,'인쇄비']);assert.deepEqual(separate.map(i=>i.quantity),[3,3]);
+  assert.deepEqual(separate.map(i=>i.size),['970x2500xT100','970x2500xT100']);
+  assert.equal(separate[0].note,'메모');assert.equal(separate[1].note,'');
+  assert.equal(included[0].price,separate[0].price+separate[1].price);
+  assert.equal(separate[0].price,fabricPrice({...pricing,component:'frame'},config).price);
+  assert.equal(separate[1].price,fabricPrice({...pricing,component:'print'},config).price);
+  assert.throws(()=>quote([{...item,pricing:{...pricing,product:'invalid'}}]));
+  assert.throws(()=>quote([{...item,pricing:{...pricing,printStyle:'invalid'}}]));
+  assert.equal(quote(Array(50).fill({...item,pricing:{...pricing,printStyle:'separate'}})).items.length,100);
+  assert.throws(()=>quote(Array(51).fill({...item,pricing:{...pricing,printStyle:'separate'}})));
+ }
+});
 test('fabric modes calculate actual area, ceiling-width frames, separate components, and whole-won rounding',()=>{
  const p={width:1500,height:2500,mode:'general',component:'both'};
  assert.deepEqual(fabricPrice(p,config),{frame:75000,printing:37500,price:112500,meters:2,area:3.75});
