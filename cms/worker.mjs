@@ -138,7 +138,7 @@ async function login(request, env) {
 }
 async function route(request, env) {
   const url = new URL(request.url), path = url.pathname, method = request.method;
-  if (path === '/api/admin/quotes/export') return quoteRoute(request,env,{session,readJSON,fail});
+  if (path === '/api/admin/quotes/export' || path === '/api/admin/quotes/pricing') return quoteRoute(request,env,{session,readJSON,fail,json});
   let decodedPath;try { decodedPath=decodeURIComponent(path).replace(/\/+/g,'/'); } catch { fail('주소를 확인해 주세요.'); }
   if (decodedPath.startsWith('/admin/quotation')) {
     try { await session(request,env); }

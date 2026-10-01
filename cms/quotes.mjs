@@ -1,11 +1,22 @@
 import {unzipSync,zipSync,strFromU8,strToU8} from 'fflate';
+import {fabricPrice} from './public/admin/quotation-pricing.js';
 const invalid=message=>{throw Object.assign(new Error(message),{status:400});};
 const text=(value,max,required=false)=>{if(typeof value!=='string'||value.length>max||/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(value)||(required&&!value.trim()))invalid('필수 항목과 입력 길이를 확인해 주세요.');return value.trim();};
-export function validateQuote(data){
+export function validateQuote(data,config){
  if(!data||!Array.isArray(data.items)||data.items.length<1||data.items.length>100)invalid('품목은 1~100개까지 입력해 주세요.');
  const q={};for(const [key,max,required]of [['date',10,true],['customer',80,true],['project',100,false],['period',80,false],['contact',80,false],['person',80,false],['email',120,false]])q[key]=text(data[key]??'',max,required);
  if(!/^20\d\d-\d\d-\d\d$/.test(q.date)||!Number.isFinite(Date.parse(q.date))||new Date(q.date).toISOString().slice(0,10)!==q.date)invalid('견적일을 확인해 주세요.');
- q.items=data.items.map(i=>{if(!i||!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>1000000||!Number.isSafeInteger(i.price)||i.price<0||i.price>1000000000)invalid('수량과 단가는 범위 내 정수로 입력해 주세요.');return {name:text(i.name,80,true),size:text(i.size??'',100),quantity:i.quantity,price:i.price,note:text(i.note??'',150)};});
+ q.items=data.items.map(i=>{
+  if(!i)invalid('품목을 확인해 주세요.');
+  let price=i.price,size=i.size??'';
+  if(i.pricing!==undefined){
+   try{price=fabricPrice(i.pricing,config).price;}catch(e){invalid(e.message);}
+   const thickness=text(i.pricing.thickness??'',30);
+   size=i.pricing.width+'x'+i.pricing.height+(thickness?'x'+thickness:'');
+  }
+  if(!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>1000000||!Number.isSafeInteger(price)||price<0||price>1000000000)invalid('수량과 단가는 범위 내 정수로 입력해 주세요.');
+  return {name:text(i.name,80,true),size:text(size,100),quantity:i.quantity,price,note:text(i.note??'',150)};
+ });
  const subtotal=q.items.reduce((s,i)=>s+i.quantity*i.price,0);if(!Number.isSafeInteger(subtotal)||subtotal>1000000000000)invalid('견적 금액이 허용 범위를 초과했습니다.');
  return q;
 }
@@ -57,10 +68,23 @@ export function exportQuote(template,q){
  return zipSync(files,{level:6});
 }
 export async function quoteRoute(request,env,helpers){
- const {session,readJSON,fail}=helpers;const method=request.method;
+ const {session,readJSON,fail,json}=helpers;const method=request.method,path=new URL(request.url).pathname;
  await session(request,env,method!=='GET'&&method!=='HEAD');
+ if(path==='/api/admin/quotes/pricing'){
+  if(method!=='GET')fail('지원하지 않는 작업입니다.',405);
+  const r=await env.DB.prepare('SELECT config_json FROM quote_pricing WHERE id=1').first();
+  if(!r)fail('단가 기준을 준비하고 있습니다.',503);
+  return json({config:JSON.parse(r.config_json)},200,{'Cache-Control':'private, no-store'});
+ }
  if(method!=='POST')fail('지원하지 않는 작업입니다.',405);
- const q=validateQuote(await readJSON(request,128*1024));
+ const data=await readJSON(request,128*1024);
+ let config;
+ if(Array.isArray(data?.items)&&data.items.some(i=>i?.pricing!==undefined)){
+  const r=await env.DB.prepare('SELECT config_json FROM quote_pricing WHERE id=1').first();
+  if(!r)fail('단가 기준을 준비하고 있습니다.',503);
+  config=JSON.parse(r.config_json);
+ }
+ const q=validateQuote(data,config);
  const record=await env.DB.prepare('SELECT xlsx_base64 FROM quote_template WHERE id=1').first();if(!record)fail('견적서 양식을 준비하고 있습니다.',503);
  const bytes=Uint8Array.from(atob(record.xlsx_base64),c=>c.charCodeAt(0)),file=exportQuote(bytes,q);
  const name=(q.customer+'_'+q.date+'_견적서.xlsx').replace(/[\\/:*?"<>|\r\n]/g,'_');

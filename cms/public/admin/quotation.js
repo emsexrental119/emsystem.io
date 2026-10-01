@@ -1,13 +1,73 @@
-'use strict';
-const $=s=>document.querySelector(s),form=$('#quote-form');let csrf,busy=false,dirty=false;
+import {fabricPrice} from './quotation-pricing.js';
+const $=s=>document.querySelector(s),form=$('#quote-form');let csrf,config,busy=false,dirty=false;
 const money=n=>new Intl.NumberFormat('ko-KR').format(n)+'원';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
+const get=(row,key)=>row.querySelector('[data-key="'+key+'"]');
 function status(message,error=false){$('#status').textContent=message;$('#status').className=error?'error':'';}
-function totals(){let sum=0;for(const row of $('#items').children){const amount=Number(row.querySelector('[data-key="quantity"]').value)*Number(row.querySelector('[data-key="price"]').value);sum+=amount;row.querySelector('.amount').textContent='품목 금액 '+money(amount);}$('#subtotal').textContent=money(sum);const vat=Math.round(sum*.1);$('#vat').textContent=money(vat);$('#total').textContent=money(sum+vat);}
-function addItem(){if(busy)return;if($('#items').children.length>=100){status('품목은 100개까지 입력할 수 있습니다.',true);return;}const row=node('div');row.className='quote-item';for(const [key,title,type,max]of [['name','품명','text',80],['size','규격','text',100],['quantity','수량','number',1000000],['price','단가 (원)','number',1000000000],['note','비고','text',150]]){const label=node('label',title),input=node('input');input.dataset.key=key;input.type=type;if(type==='number'){input.min=key==='quantity'?'1':'0';input.max=String(max);input.step='1';input.required=true;input.value=key==='quantity'?'1':'';}else{input.maxLength=max;input.required=key==='name';}label.append(input);row.append(label);}const remove=node('button','삭제');remove.type='button';remove.onclick=()=>{if(busy)return;if($('#items').children.length===1){status('품목을 하나 이상 입력해 주세요.',true);return;}row.remove();dirty=true;totals();};row.append(remove);const amount=node('p');amount.className='amount';row.append(amount);$('#items').append(row);totals();}
-$('#add-item').onclick=()=>{addItem();dirty=true;};form.oninput=()=>{dirty=true;totals();};
-form.onsubmit=async event=>{event.preventDefault();if(busy)return;const data=Object.fromEntries(new FormData(form));data.items=[...$('#items').children].map(row=>Object.fromEntries([...row.querySelectorAll('input')].map(i=>[i.dataset.key,i.type==='number'?Number(i.value):i.value])));busy=true;form.querySelectorAll('button,input').forEach(n=>n.disabled=true);status('엑셀 파일을 만들고 있습니다.');
- try{const r=await fetch('/api/admin/quotes/export',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(data)});if(!r.ok){const d=await r.json();throw Error(d.error||'다운로드하지 못했습니다.');}const blob=await r.blob(),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download=(data.customer+'_'+data.date+'_견적서.xlsx').replace(/[\\/:*?"<>|]/g,'_');document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);status('엑셀 다운로드를 시작했습니다. 다운로드 폴더에서 확인해 주세요.');dirty=false;}
- catch(e){status(e.message,true);}finally{busy=false;form.querySelectorAll('button,input').forEach(n=>n.disabled=false);}};
+function field(root,key,title,type,max,value=''){
+ const label=node('label',title),input=node('input');input.dataset.key=key;input.type=type;
+ if(type==='number'){input.min=key==='price'?'0':'1';input.max=String(max);input.step='1';}else input.maxLength=max;
+ input.value=value;label.append(input);root.append(label);return input;
+}
+function select(root,key,title,options){
+ const label=node('label',title),input=node('select');input.dataset.key=key;
+ for(const [value,text]of options){const option=node('option',text);option.value=value;input.append(option);}
+ label.append(input);root.append(label);return input;
+}
+function pricing(row){return {mode:get(row,'mode').value,component:get(row,'component').value,width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
+function sync(row,changeName=false){
+ const component=get(row,'component').value,auto=component!=='manual',price=get(row,'price'),size=get(row,'size'),detail=row.querySelector('.price-detail');
+ row.querySelector('.quote-calculator').hidden=!auto;
+ for(const k of ['width','height','mode','thickness']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
+ price.readOnly=auto;size.readOnly=auto;
+ price.setCustomValidity('');get(row,'width').setCustomValidity('');
+ if(changeName){get(row,'name').value=({both:'패브릭 금형+인쇄',frame:'패브릭 금형',print:'패브릭 인쇄',manual:''})[component];if(!auto){price.value='';size.value='';}}
+ if(!auto){detail.textContent='직접 입력한 단가를 적용합니다.';return;}
+ const input=pricing(row);size.value=input.width&&input.height?input.width+'x'+input.height+(input.thickness?'x'+input.thickness:''):'';
+ if(!get(row,'width').value||!get(row,'height').value){price.value='';detail.textContent='가로와 높이를 입력하면 단가가 계산됩니다.';return;}
+ try{
+  const result=fabricPrice(input,config);price.value=result.price;
+  const parts=[];if(component!=='print')parts.push('금형 '+money(result.frame));if(component!=='frame')parts.push('인쇄 '+money(result.printing));
+  if(input.mode==='dispatch'&&component!=='print')parts.push('금형 가로 '+result.meters+'m 적용');
+  if(component!=='frame')parts.push('인쇄 면적 '+new Intl.NumberFormat('ko-KR',{maximumFractionDigits:6}).format(result.area)+'㎡');
+  detail.textContent=parts.join(' · ');
+ }catch(e){price.value='';get(row,'width').setCustomValidity(e.message);detail.textContent=e.message;}
+}
+function totals(){let sum=0;for(const row of $('#items').children){const value=get(row,'price').value,amount=Number(get(row,'quantity').value)*Number(value);sum+=amount;row.querySelector('.amount').textContent=value===''?'품목 금액: 단가 입력 대기':'품목 금액 '+money(amount);}$('#subtotal').textContent=money(sum);const vat=Math.round(sum*.1);$('#vat').textContent=money(vat);$('#total').textContent=money(sum+vat);}
+function addItem(){
+ if(busy)return;if($('#items').children.length>=100){status('품목은 100개까지 입력할 수 있습니다.',true);return;}
+ const row=node('div');row.className='quote-item';
+ const controls=node('div');controls.className='quote-item-controls';
+ select(controls,'component','품명 선택',[['both','패브릭 금형+인쇄'],['frame','패브릭 금형'],['print','패브릭 인쇄'],['manual','기타 · 직접 입력']]);
+ const remove=node('button','품목 삭제');remove.type='button';remove.onclick=()=>{if(busy)return;if($('#items').children.length===1){status('품목을 하나 이상 입력해 주세요.',true);return;}row.remove();dirty=true;totals();};controls.append(remove);row.append(controls);
+ const calc=node('div');calc.className='quote-calculator';
+ select(calc,'mode','단가 종류',[['general','일반단가'],['contract','장치단가'],['dispatch','출고단가']]);
+ field(calc,'width','가로 (mm)','number',100000);
+ field(calc,'height','높이 (mm)','number',100000);
+ field(calc,'thickness','두께 · 선택','text',30).placeholder='예: T140';row.append(calc);
+ for(const [key,title,type,max,value]of [['name','견적서 표시 품명','text',80,'패브릭 금형+인쇄'],['size','규격','text',100,''],['quantity','수량','number',1000000,'1'],['price','단가 (원)','number',1000000000,''],['note','비고','text',150,'']]){const input=field(row,key,title,type,max,value);input.required=['name','quantity','price'].includes(key);}
+ const detail=node('p');detail.className='price-detail';row.append(detail);
+ const amount=node('p');amount.className='amount';row.append(amount);$('#items').append(row);sync(row);totals();
+}
+$('#add-item').onclick=()=>{addItem();dirty=true;};
+function changed(event){dirty=true;const row=event.target.closest('.quote-item');if(row)sync(row,event.target.dataset.key==='component');totals();}
+form.addEventListener('input',changed);form.addEventListener('change',event=>{if(event.target.tagName==='SELECT')changed(event);});
+form.onsubmit=async event=>{
+ event.preventDefault();if(busy)return;
+ const data=Object.fromEntries(new FormData(form));data.items=[...$('#items').children].map(row=>{
+  const item=Object.fromEntries(['name','size','quantity','price','note'].map(k=>[k,['quantity','price'].includes(k)?Number(get(row,k).value):get(row,k).value]));
+  if(get(row,'component').value!=='manual')item.pricing=pricing(row);return item;
+ });
+ busy=true;form.querySelectorAll('button,input,select').forEach(n=>n.disabled=true);status('엑셀 파일을 만들고 있습니다.');
+ try{
+  const r=await fetch('/api/admin/quotes/export',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(data)});
+  if(!r.ok){const d=await r.json();throw Error(d.error||'다운로드하지 못했습니다.');}
+  const blob=await r.blob(),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download=(data.customer+'_'+data.date+'_견적서.xlsx').replace(/[\\/:*?"<>|]/g,'_');document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);status('엑셀 다운로드를 시작했습니다. 다운로드 폴더에서 확인해 주세요.');dirty=false;
+ }catch(e){status(e.message,true);}finally{busy=false;form.querySelectorAll('button,input,select').forEach(n=>n.disabled=false);for(const row of $('#items').children)sync(row);}
+};
 window.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
-(async()=>{try{const r=await fetch('/api/session',{cache:'no-store'});const d=await r.json();if(!r.ok)throw Error(d.error);csrf=d.csrf;form.elements.date.value=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date());addItem();form.hidden=false;status('관리자 전용 견적서입니다.');}catch(e){status(e.message||'로그인이 필요합니다.',true);const a=node('a','관리자 로그인');a.href='/admin/';$('#status').append(document.createTextNode(' '),a);}})();
+(async()=>{try{
+ const r=await fetch('/api/session',{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error(d.error);csrf=d.csrf;
+ const pr=await fetch('/api/admin/quotes/pricing',{cache:'no-store'}),pd=await pr.json();if(!pr.ok)throw Error(pd.error);config=pd.config;
+ form.elements.date.value=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date());addItem();form.hidden=false;status('관리자 전용 견적서입니다.');
+}catch(e){status(e.message||'로그인이 필요합니다.',true);if(!csrf){const a=node('a','관리자 로그인');a.href='/admin/';$('#status').append(document.createTextNode(' '),a);}}})();

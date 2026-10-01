@@ -19,12 +19,16 @@ test('quote validates inputs, preserves amounts and emits safe literal strings w
  for(const d of [{...input(),date:'2026-02-30'},{...input(),customer:''},{...input(),items:[]},{...input(),items:[{name:'x',quantity:1.2,price:1}]},{...input(),items:[{name:'x',quantity:1,price:-1}]},{...input(),items:[{name:'x',quantity:1000000,price:1000000000}]}])assert.throws(()=>validateQuote(d));
 });
 test('quote screen and export require admin session; employee token and missing CSRF are rejected',async()=>{
- const db=new DatabaseSync(':memory:');for(const f of ['0001_content.sql','0005_quote_template.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
+ const db=new DatabaseSync(':memory:');for(const f of ['0001_content.sql','0005_quote_template.sql','0006_quote_pricing.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
  const statement=(s,p=[])=>({bind:(...p)=>statement(s,p),first:async()=>db.prepare(s).get(...p)||null});
  const token='a'.repeat(64),csrf='b'.repeat(64);db.prepare('INSERT INTO sessions VALUES (?,?,?)').run(createHash('sha256').update(token).digest('hex'),csrf,Date.now()+60000);
  db.prepare('INSERT INTO quote_template VALUES (1,?,?)').run(Buffer.from(template()).toString('base64'),Date.now());
  const env={DB:{prepare:statement},ASSETS:{fetch:async()=>new Response('private form')}},h={Cookie:'__Host-ems-admin='+token,Origin:'https://cms.test','X-CSRF-Token':csrf};
  const req=(path,opts={})=>worker.fetch(new Request('https://cms.test'+path,opts),env),payload=JSON.stringify(input());
+ db.prepare('INSERT INTO quote_pricing VALUES (1,?,?)').run(JSON.stringify({dispatch:{perMeter:12345}}),Date.now());
+ assert.equal((await req('/api/admin/quotes/pricing')).status,401);
+ assert.equal((await req('/api/admin/quotes/pricing',{headers:{Authorization:'Bearer employee-link'}})).status,401);
+ const rules=await req('/api/admin/quotes/pricing',{headers:h});assert.equal(rules.status,200);assert.equal(rules.headers.get('cache-control'),'private, no-store');assert.equal((await rules.json()).config.dispatch.perMeter,12345);
  assert.equal((await req('/admin/quotation.html')).status,302);assert.equal((await req('/admin/quotation.js')).status,401);assert.equal((await req('/admin/quotation.html',{headers:h})).status,200);
  assert.equal((await req('/api/admin/quotes/export',{method:'POST',headers:{Authorization:'Bearer employee-link'},body:payload})).status,401);
  assert.equal((await req('/api/admin/quotes/export',{method:'POST',headers:{Cookie:h.Cookie,Origin:h.Origin},body:payload})).status,403);
