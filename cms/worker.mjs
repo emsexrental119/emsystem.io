@@ -1,6 +1,7 @@
 import seed from './seed.json' with { type: 'json' };
 import {inventoryRoute} from './inventory.mjs';
 import {scheduleRoute} from './schedule.mjs';
+import {quoteRoute} from './quotes.mjs';
 import serviceDefaults from './services-defaults.json' with { type: 'json' };
 import servicePageDefaults from './service-page-defaults.json' with { type: 'json' };
 
@@ -137,6 +138,12 @@ async function login(request, env) {
 }
 async function route(request, env) {
   const url = new URL(request.url), path = url.pathname, method = request.method;
+  if (path === '/api/admin/quotes/export') return quoteRoute(request,env,{session,readJSON,fail});
+  let decodedPath;try { decodedPath=decodeURIComponent(path).replace(/\/+/g,'/'); } catch { fail('주소를 확인해 주세요.'); }
+  if (decodedPath.startsWith('/admin/quotation')) {
+    try { await session(request,env); }
+    catch(e) { if(e.status===401&&path.endsWith('.html'))return Response.redirect(url.origin+'/admin/',302);throw e; }
+  }
   if (path === '/api/inventory' || path === '/api/admin/inventory' || path === '/api/admin/inventory/link') return inventoryRoute(request,env,{json,fail,random,equal,session,readJSON});
   if (path === '/api/schedule' || path === '/api/admin/schedule') return scheduleRoute(request,env,{json,fail,random,equal,session,readJSON});
   if (path === '/api/public/content' && method === 'GET') {

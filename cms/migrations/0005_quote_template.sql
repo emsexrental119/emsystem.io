@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS quote_template (
+ id INTEGER PRIMARY KEY CHECK(id=1),
+ xlsx_base64 TEXT NOT NULL,
+ updated_at INTEGER NOT NULL
+);

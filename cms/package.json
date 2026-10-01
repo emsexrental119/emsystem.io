@@ -10,5 +10,8 @@
   "devDependencies": {
     "esbuild-wasm": "^0.28.2",
     "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2"
   }
 }
