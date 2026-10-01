@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>행사 일정 · EMSYSTEM</title><link rel="stylesheet" href="/stock/style.css"><link rel="stylesheet" href="/schedule/style.css"><script src="/schedule/app.js" defer></script></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>행사 일정 · EMSYSTEM</title><link rel="stylesheet" href="/stock/style.css"><link rel="stylesheet" href="/schedule/style.css"><script src="/schedule/app.js" defer></script><script src="/schedule/print.js" defer></script></head>
 <body><header><a class="brand" href="https://emsystem.co.kr/">EMSYSTEM</a><span>직원 공유 · 조회 전용</span><a id="stock-link" href="/stock/">재고 조회</a></header>
-<main><div class="heading"><div><p class="eyebrow">설치 · 철거</p><h1>행사 일정</h1><p class="muted">날짜별 설치·철거 일정과 행사별 품목을 확인하세요.</p></div><div class="actions"><button id="refresh">새로고침</button></div></div><p id="status" role="status">일정을 불러오고 있습니다.</p>
+<main><div class="heading"><div><p class="eyebrow">설치 · 철거</p><h1>행사 일정</h1><p class="muted">날짜별 설치·철거 일정과 행사별 품목을 확인하세요.</p></div><div class="actions"><button id="refresh">새로고침</button><button id="print-schedule">인쇄 / PDF</button></div></div><p id="status" role="status">일정을 불러오고 있습니다.</p>
 <div id="content" hidden>
 
 <section class="month-tools"><button id="prev" aria-label="이전 달">←</button><label>조회 월<input id="month" type="month" min="2000-01" max="2100-12"></label><button id="next" aria-label="다음 달">→</button><button id="today">이번 달</button><label class="search">행사·품목 검색<input id="search" type="search" placeholder="행사명, 사이즈, 비고"></label></section>
