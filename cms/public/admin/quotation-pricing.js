@@ -17,7 +17,13 @@ export function fabricPrice(input,config){
  }
  if(component!=='frame')printing=rate(area,rule.print);
  // Round each separately quoted component to the nearest won.
- frame=Math.round(frame);printing=Math.round(printing)*printSides;
- const price=frame+printing;if(!Number.isSafeInteger(price)||price>1000000000)throw Error('품목 단가가 허용 범위를 초과했습니다.');
+ if(mode!=='contract'){frame=Math.round(frame);printing=Math.round(printing);}
+ // Truncate each displayed quote unit price, before multiplying its quantity.
+ const separate=component!=='both'||input.printStyle==='separate';
+ if(mode==='contract'&&separate){frame=Math.floor(frame/1000)*1000;printing=Math.floor(printing/1000)*1000;}
+ printing*=printSides;
+ let price=frame+printing;
+ if(mode==='contract'&&!separate)price=Math.floor(price/1000)*1000;
+ if(!Number.isSafeInteger(price)||price>1000000000)throw Error('품목 단가가 허용 범위를 초과했습니다.');
  return {frame,printing,price,meters,area:area/1000000};
 }

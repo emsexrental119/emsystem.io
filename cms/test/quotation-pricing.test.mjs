@@ -4,7 +4,7 @@ import {fabricPrice,fabricProducts} from '../public/admin/quotation-pricing.js';
 import {validateQuote} from '../quotes.mjs';
 // Synthetic rates: production price rules are stored privately in the database.
 const config={general:{frame:{numerator:2,denominator:100},print:{numerator:1,denominator:100}},contract:{frame:{numerator:17,denominator:1000},print:{numerator:7,denominator:1000}},dispatch:{perMeter:12345,print:{numerator:1,denominator:100}}};
-test('fabric names and print presentation are enforced on export with identical combined totals',()=>{
+test('fabric names and print presentation are enforced on export with displayed-unit rounding',()=>{
  for(const mode of ['general','contract','dispatch'])for(const [product,name]of Object.entries(fabricProducts)){
   const pricing={mode,component:'frame',product,printStyle:'included',width:970,height:2500,thickness:'T100'};
   const item={name:'untrusted name',price:1,quantity:3,note:'메모',pricing};
@@ -14,7 +14,8 @@ test('fabric names and print presentation are enforced on export with identical 
   assert.deepEqual(separate.map(i=>i.name),[name,'인쇄비']);assert.deepEqual(separate.map(i=>i.quantity),[3,3]);
   assert.deepEqual(separate.map(i=>i.size),['970x2500xT100','970x2500xT100']);
   assert.equal(separate[0].note,'메모');assert.equal(separate[1].note,'');
-  assert.equal(included[0].price,separate[0].price+separate[1].price);
+  if(mode!=='contract')assert.equal(included[0].price,separate[0].price+separate[1].price);
+  else {assert.equal(included[0].price,58000);assert.deepEqual(separate.map(i=>i.price),[41000,16000]);}
   assert.equal(separate[0].price,fabricPrice({...pricing,component:'frame'},config).price);
   assert.equal(separate[1].price,fabricPrice({...pricing,component:'print'},config).price);
   assert.throws(()=>quote([{...item,pricing:{...pricing,product:'invalid'}}]));
@@ -41,9 +42,26 @@ test('double-sided printing doubles only printing across modes, rounding and quo
   const quote=printStyle=>validateQuote({date:'2026-10-01',customer:'테스트',pricingMode:mode,items:[{name:'x',quantity:3,price:1,pricing:{...p,printStyle,printSides:2}}]},config).items;
   const combined=quote('included'),split=quote('separate');
   assert.equal(combined[0].price,two.price);assert.equal(combined[0].note,'인쇄비 포함');
-  assert.deepEqual(split.map(i=>i.price),[one.frame,one.printing]);assert.deepEqual(split.map(i=>i.quantity),[3,6]);assert.equal(split[1].note,'');
+  assert.deepEqual(split.map(i=>i.price),['frame','print'].map(component=>fabricPrice({...p,component},config).price));assert.deepEqual(split.map(i=>i.quantity),[3,6]);assert.equal(split[1].note,'');
  }
  for(const printSides of [0,3,-1,1.5,'2'])assert.throws(()=>fabricPrice({mode:'general',width:100,height:100,component:'both',printSides},config));
+});
+test('contract unit prices discard sub-thousand amounts before quantity for both companies',()=>{
+ for(const [frame,printing,expected]of [[200001,85221,370000],[200000,85400,370000],[200000,85500,371000],[200000,85499.8,370000]]){
+  const rule={frame:{numerator:Math.round(frame*10),denominator:10},print:{numerator:Math.round(printing*10),denominator:10}};
+  const rates={...config,contract:rule,general:rule};
+  const pricing={mode:'contract',width:1,height:1,component:'both',product:'backwall',printStyle:'included',printSides:2};
+  assert.equal(fabricPrice(pricing,rates).price,expected);
+  for(const company of ['emsystem','rental119']){
+   const quote=printStyle=>validateQuote({company,date:'2026-10-01',customer:'test',pricingMode:'contract',items:[{quantity:3,pricing:{...pricing,printStyle}}]},rates);
+   const included=quote('included'),split=quote('separate');
+   assert.equal(included.items[0].price,expected);assert.equal(included.items[0].quantity,3);
+   assert.deepEqual(split.items.map(i=>i.price),[Math.floor(frame/1000)*1000,Math.floor(printing/1000)*1000]);
+   assert.deepEqual(split.items.map(i=>i.quantity),[3,6]);
+   assert.equal(fabricPrice({...pricing,printStyle:'separate'},rates).price*3,split.items.reduce((sum,i)=>sum+i.price*i.quantity,0));
+  }
+  assert.equal(fabricPrice({...pricing,mode:'general'},rates).price,Math.round(frame)+Math.round(printing)*2);
+ }
 });
 test('fabric modes calculate actual area, ceiling-width frames, separate components, and whole-won rounding',()=>{
  const p={width:1500,height:2500,mode:'general',component:'both'};
