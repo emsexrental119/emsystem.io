@@ -6,7 +6,11 @@ export function validateQuote(data,config){
  if(!data||!Array.isArray(data.items)||data.items.length<1||data.items.length>100)invalid('품목은 1~100개까지 입력해 주세요.');
  const q={};for(const [key,max,required]of [['date',10,true],['customer',80,true],['project',100,false],['period',80,false],['contact',80,false],['person',80,false],['email',120,false]])q[key]=text(data[key]??'',max,required);
  if(!/^20\d\d-\d\d-\d\d$/.test(q.date)||!Number.isFinite(Date.parse(q.date))||new Date(q.date).toISOString().slice(0,10)!==q.date)invalid('견적일을 확인해 주세요.');
- const expanded=data.items.flatMap(i=>{
+ const modes=[...new Set(data.items.filter(i=>i?.pricing).map(i=>i.pricing.mode))];
+ const pricingMode=data.pricingMode??(modes.length===1?modes[0]:undefined);
+ if((data.pricingMode!==undefined||modes.length)&&!['general','contract','dispatch'].includes(pricingMode))invalid('견적서 전체에 적용할 단가 종류를 하나 선택해 주세요.');
+ const expanded=data.items.flatMap(original=>{
+  const i=original?.pricing?{...original,pricing:{...original.pricing,mode:pricingMode}}:original;
   if(i?.pricing?.product===undefined)return [i];
   const p=i.pricing;
   if(!Object.hasOwn(fabricProducts,p.product)||!['included','separate'].includes(p.printStyle))invalid('페브릭 품명과 인쇄비 표시 방법을 선택해 주세요.');

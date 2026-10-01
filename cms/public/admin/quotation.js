@@ -14,11 +14,11 @@ function select(root,key,title,options){
  for(const [value,text]of options){const option=node('option',text);option.value=value;input.append(option);}
  label.append(input);root.append(label);return input;
 }
-function pricing(row){return {mode:get(row,'mode').value,component:'both',product:get(row,'product').value,printStyle:get(row,'printStyle').value,width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
+function pricing(row){return {mode:form.elements.pricingMode.value,component:'both',product:get(row,'product').value,printStyle:get(row,'printStyle').value,width:Number(get(row,'width').value),height:Number(get(row,'height').value),thickness:get(row,'thickness').value};}
 function sync(row,changeName=false){
  const auto=get(row,'product').value!=='manual',price=get(row,'price'),size=get(row,'size'),detail=row.querySelector('.price-detail');
  row.querySelector('.quote-calculator').hidden=!auto;
- for(const k of ['width','height','mode','thickness','printStyle']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
+ for(const k of ['width','height','thickness','printStyle']){get(row,k).disabled=!auto;get(row,k).required=auto&&['width','height'].includes(k);}
  price.readOnly=auto;size.readOnly=auto;
  price.setCustomValidity('');get(row,'width').setCustomValidity('');
  get(row,'name').readOnly=auto;
@@ -44,7 +44,6 @@ function addItem(){
  select(controls,'printStyle','인쇄비 표시',[['included','인쇄비 포함 · 한 줄로 합산'],['separate','인쇄비 별도 · 두 줄로 분리']]);
  const remove=node('button','품목 삭제');remove.type='button';remove.onclick=()=>{if(busy)return;if($('#items').children.length===1){status('품목을 하나 이상 입력해 주세요.',true);return;}row.remove();dirty=true;totals();};controls.append(remove);row.append(controls);
  const calc=node('div');calc.className='quote-calculator';
- select(calc,'mode','단가 종류',[['general','일반단가'],['contract','장치단가'],['dispatch','출고단가']]);
  field(calc,'width','가로 (mm)','number',100000);
  field(calc,'height','높이 (mm)','number',100000);
  field(calc,'thickness','두께 · 선택','text',30).placeholder='예: T140';row.append(calc);
@@ -53,7 +52,7 @@ function addItem(){
  const amount=node('p');amount.className='amount';row.append(amount);$('#items').append(row);sync(row);totals();
 }
 $('#add-item').onclick=()=>{addItem();dirty=true;};
-function changed(event){dirty=true;const row=event.target.closest('.quote-item');if(row)sync(row,event.target.dataset.key==='product');totals();}
+function changed(event){dirty=true;if(event.target.name==='pricingMode'){for(const row of $('#items').children)sync(row);}else{const row=event.target.closest('.quote-item');if(row)sync(row,event.target.dataset.key==='product');}totals();}
 form.addEventListener('input',changed);form.addEventListener('change',event=>{if(event.target.tagName==='SELECT')changed(event);});
 form.onsubmit=async event=>{
  event.preventDefault();if(busy)return;

@@ -23,6 +23,16 @@ test('fabric names and print presentation are enforced on export with identical 
   assert.throws(()=>quote(Array(51).fill({...item,pricing:{...pricing,printStyle:'separate'}})));
  }
 });
+test('one quote-level pricing mode overrides every fabric row including split printing',()=>{
+ const item=mode=>({name:'ignored',quantity:2,price:1,pricing:{mode,component:'both',product:'wing',printStyle:'separate',width:1500,height:2500}});
+ const base={date:'2026-10-01',customer:'테스트',items:[item('general'),item('dispatch'),{name:'수동',quantity:1,price:4321}]};
+ for(const pricingMode of ['general','contract','dispatch']){
+  const q=validateQuote({...base,pricingMode},config),expected=fabricPrice({...base.items[0].pricing,mode:pricingMode},config);
+  assert.deepEqual(q.items.map(i=>i.price),[expected.frame,expected.printing,expected.frame,expected.printing,4321]);
+ }
+ assert.throws(()=>validateQuote(base,config));
+ assert.throws(()=>validateQuote({...base,pricingMode:'invalid'},config));
+});
 test('fabric modes calculate actual area, ceiling-width frames, separate components, and whole-won rounding',()=>{
  const p={width:1500,height:2500,mode:'general',component:'both'};
  assert.deepEqual(fabricPrice(p,config),{frame:75000,printing:37500,price:112500,meters:2,area:3.75});
