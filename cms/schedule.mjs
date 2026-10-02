@@ -8,12 +8,13 @@ export function validateEvents(events) {
  const ids=new Set();
  return events.map(e=>{
   if(!e || typeof e.id!=='string'||! /^[a-zA-Z0-9_-]{1,80}$/.test(e.id)||ids.has(e.id))fail('일정 번호를 확인해 주세요.');
-  ids.add(e.id);const installDate=date(e.installDate),removalDate=date(e.removalDate);
+  const undated=e.installDate===''&&e.removalDate==='';
+  ids.add(e.id);const installDate=undated?'':date(e.installDate),removalDate=undated?'':date(e.removalDate);
   if(removalDate<installDate)fail('철거일은 설치일보다 빠를 수 없습니다.');
   if(!Array.isArray(e.items)||e.items.length>500)fail('행사별 품목은 최대 500줄입니다.');
   const items=e.items.map(i=>{if(!i||!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>1000000)fail('품목 수량은 1 이상 정수로 입력해 주세요.');return {category:text(i.category,80,true),size:text(i.size,80,true),quantity:i.quantity,thickness:text(i.thickness,80),note:text(i.note,500)};});
   return {id:e.id,title:text(e.title,200,true),installDate,removalDate,note:text(e.note??'',1000),items};
- }).sort((a,b)=>a.installDate.localeCompare(b.installDate)||a.removalDate.localeCompare(b.removalDate)||a.title.localeCompare(b.title,'ko'));
+ }).sort((a,b)=>Number(!a.installDate)-Number(!b.installDate)||a.installDate.localeCompare(b.installDate)||a.removalDate.localeCompare(b.removalDate)||a.title.localeCompare(b.title,'ko'));
 }
 
 export async function scheduleRoute(request,env,helpers) {

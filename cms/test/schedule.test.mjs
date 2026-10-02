@@ -52,4 +52,20 @@ test('schedule validation rejects impossible dates and malformed items while kee
  const e=event();e.items[0].size='-';e.items[0].thickness='-';assert.equal(validateEvents([e])[0].items[0].size,'-');
  const leap={...event(),installDate:'2028-02-29',removalDate:'2028-03-01'};assert.equal(validateEvents([leap])[0].installDate,'2028-02-29');
 });
+test('undated events persist for employees and can be scheduled later without losing items',async()=>{
+ const s=setup(),headers=s.headers;
+ const inventory=await(await s.req('/api/admin/inventory',{headers})).json();
+ const viewer={Authorization:'Bearer '+inventory.shareUrl.split('#')[1]};
+ let state=await(await s.req('/api/admin/schedule',{headers})).json();
+ const pending={...event(),installDate:'',removalDate:''};
+ const dated={...event(),id:'dated'};
+ for(const events of [[pending,dated],[event(),dated],[pending,dated]]){
+  const r=await s.req('/api/admin/schedule',{method:'PUT',headers,body:JSON.stringify({revision:state.revision,events})});
+  assert.equal(r.status,200);state=await r.json();
+  assert.deepEqual(state.events.find(e=>e.id===pending.id),events[0]);
+  assert.deepEqual((await(await s.req('/api/schedule',{headers:viewer})).json()).events,state.events);
+  if(!events[0].installDate)assert.equal(state.events.at(-1).id,pending.id);
+ }
+ for(const change of [{installDate:''},{removalDate:''},{installDate:null,removalDate:null},{installDate:'미정',removalDate:'미정'}])assert.throws(()=>validateEvents([{...event(),...change}]));
+});
 

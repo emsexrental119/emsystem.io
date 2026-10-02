@@ -9,7 +9,7 @@ function prepareSchedulePrint(){
   tools.append(node('p','A4 세로에 맞춰 정리했습니다. 인쇄 설정에서 머리글·바닥글을 끄면 공유 주소가 종이에 표시되지 않습니다.'));
   root.append(tools);
   const title=node('div',undefined,'print-title');
-  title.append(node('p','EMSYSTEM · 행사 일정표','print-brand'),node('h1',month.replace('-','년 ')+'월 행사 일정'));
+  title.append(node('p','EMSYSTEM · 행사 일정표','print-brand'),node('h1',month.replace('-','년 ')+'월 행사 일정 · 날짜 미정 포함'));
   title.append(node('p','행사 '+events.length+'건 · 품목 '+events.reduce((n,e)=>n+e.items.length,0)+'줄 · 수량 합계 '+events.reduce((n,e)=>n+e.items.reduce((s,i)=>s+i.quantity,0),0)+'개'));
   if(query)title.append(node('p','검색 조건: '+query));
   title.append(node('p','출력 기준 '+new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})+' · 최근 수정 '+new Date(state.updatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}),'print-meta'));
@@ -20,7 +20,7 @@ function prepareSchedulePrint(){
   for(const text of ['설치일','철거일','행사명','수량'])hr.append(node('th',text));
   head.append(hr);table.append(head);
   const body=node('tbody');
-  for(const e of events){const row=node('tr');for(const text of [e.installDate,e.removalDate,e.title,e.items.reduce((n,i)=>n+i.quantity,0)+'개'])row.append(node('td',text));body.append(row);}
+  for(const e of events){const row=node('tr');for(const text of [e.installDate||'미정',e.removalDate||'미정',e.title,e.items.reduce((n,i)=>n+i.quantity,0)+'개'])row.append(node('td',text));body.append(row);}
   table.append(body);root.append(table,node('h2','행사별 품목'));
   for(const card of $('#events').children){
     const copy=card.cloneNode(true);copy.removeAttribute('id');
